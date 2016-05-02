@@ -1,0 +1,235 @@
+--[[
+MIT License
+
+Copyright (c) 2016 suun
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+--]]
+
+local trace = trace.trace
+local clamp = math.clamp
+local random = math.random
+local IN_KEY = IN_KEY
+local function randVec()
+    return Vector(random(-0.01, 0.01), random(-0.01, 0.01), 0)
+end    
+
+local function isfbplayer(ply)
+    for _, team in pairs(fbteams) do
+        for _, p in pairs(team) do
+            if ply == p then return true end
+        end
+    end
+end
+
+local white = "models/debug/debugwhite"
+local red = "phoenix_storms/pack2/redlight"
+local blue = "phoenix_storms/pack2/darkblue"
+local black = "phoenix_storms/black_chrome"
+local isShooting = false
+local layouts = {
+    {
+        [0] = black,
+        [1] = white,
+        [2] = black,
+        [3] = white,
+    },
+    {
+        [0] = black,
+        [1] = white,
+        [2] = red,
+        [3] = black,
+    },
+    {
+        [0] = black,
+        [1] = white,
+        [2] = blue,
+        [3] = white,
+    },
+    {
+        [0] = black,
+        [1] = white,
+        [2] = blue,
+        [3] = red,
+    },
+}
+Football = Class()
+
+
+function Football:hitNormal(ply)
+    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
+    vel = (vel:getNormalized() * 200 + ply:getAimVector() * 300) * self.mul
+    vel.z = clamp(vel.z, 0, 250)
+    return vel
+end
+
+function Football:hitRun(ply)
+    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
+    vel = (vel:getNormalized() * 400 + ply:getAimVector() * 300) * self.mul
+    vel.z = clamp(vel.z, 0, 250)
+    return vel
+end
+
+
+function Football:hitStrong(ply)
+    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
+    vel = (ply:getAimVector()+randVec()) * 1250 * self.mul
+    if workholos then
+        self.trailholo:setTrails(10, 1, 5, 'trails/smoke', Color(128, 128, 255))
+    end
+    return vel
+end
+
+function Football:hitSuper(ply)
+    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
+    vel = (vel:getNormalized() * 300 + (ply:getAimVector()+randVec()) * 2000) * self.mul
+    if workholos then
+        self.trailholo:setTrails(10, 1, 5, 'trails/smoke', Color(128, 255, 128))
+    end
+    return vel
+end
+
+function Football:hitHead(ply)
+    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
+    vel = (vel:getNormalized() * 500 + ply:getAimVector() * 250) * self.mul
+    return vel
+end
+
+function Football:hitTall(ply)
+    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
+    vel = ply:getAimVector() * 350 * self.mul
+    vel.z = 500 * self.mul
+    return vel
+end    
+
+function Football:hitStop(ply)
+    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
+    vel = vel:getNormalized() * 50
+    vel.z = clamp(vel.z, 0, 10)
+    return vel
+end    
+
+function Football:hitAim(ply)
+    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
+    vel = ply:getAimVector() * 2000 * self.mul
+    vel.z = clamp(0, 100)
+    self.trailholo:setTrails(10, 1, 5, 'trails/smoke', Color(255, 128, 128))
+    return vel
+end    
+
+function Football:removeTrails()
+    if not workholos then return end
+    self.trailholo:removeTrails()
+    self.trailholo:setParent(self.e)
+end
+
+function Football:isHead(ply)
+    local lPos = ply:worldToLocal(self.e:getPos())
+    return ((not ply:isCrouching()) and lPos.z > 50) or (ply:isCrouching() and lPos.z > 30)
+end
+
+
+function Football:new(pos, model, mul)
+    self.model = model
+    self.mul = mul
+    
+    self.e = prop.create(pos, Angle(0,0,0), self.model, false)
+    self.e:setFrozen(false)
+    
+    if self.model == "models/props_phx/misc/soccerball.mdl" then
+        for k, v in pairs(layouts[math.random(1, #layouts)]) do
+            self.e:setSubMaterial(k, v)
+        end
+    end
+    if workholos then
+        self.trailholo = holograms.create(self.e:getPos(), Angle(0, 0, 0), self.model, Vector(0.1, 0.1, 0.1))
+        self.trailholo:setColor(Color(0,0,0,0))
+        self.trailholo:setParent(self.e)
+    end
+    self.e:addCollisionListener(function(data)
+        local e = data.HitEntity
+        local ply
+        if e and e:isValid() and e:isPlayer() then
+            ply = e
+            if not isfbplayer(ply) then
+                self.e:setVelocity(data.OurOldVelocity)
+                return
+            end
+        end
+        local playedSound = false
+        
+        if self.isShooting then
+            self.isShooting = false
+            self.e:setMass(80)
+            if workholos then
+                self.trailholo:unparent()
+            end
+            timer.create('RemoveTrail', 5, 1, function()
+                self:removeTrails()
+            end)
+            return
+        end
+        
+        if ply then
+            local setVel
+            if ply:keyDown(IN_KEY.RELOAD) then
+                setVel = self:hitStop(ply)
+            elseif self:isHead(ply) then
+                setVel = self:hitHead(ply) 
+            elseif ply:keyDown(IN_KEY.USE) then
+                self:removeTrails()
+                timer.remove('RemoveTrail')                
+                local onGround = trace(ply:getPos(),ply:getPos()-Vector(0,0,10)).Hit
+    
+                local i = 0
+                if onGround then
+                    setVel = self:hitStrong(ply)
+                else
+                    setVel = self:hitSuper(ply)
+                end
+                self.e:setMass(120)
+                if workholos then
+                    self.trailholo:setPos(self.e:getPos())
+                    self.trailholo:setParent(self.e)
+                end
+                self.isShooting = true
+            elseif ply:keyDown(IN_KEY.WALK) then
+                setVel = self:hitTall(ply)
+            elseif ply:keyDown(IN_KEY.DUCK) then
+                self:removeTrails()
+                timer.remove('RemoveTrail')
+                setVel = self:hitAim(ply)
+                if workholos then
+                    self.trailholo:setPos(self.e:getPos())
+                    self.trailholo:setParent(self.e)    
+                end
+                self.isShooting = true
+            elseif ply:keyDown(IN_KEY.RUN) then
+                setVel = self:hitRun(ply)
+            else
+                setVel = self:hitNormal(ply)
+            end
+            self.e:setVelocity(setVel)
+            if not playedSound then
+                self.e:emitSound("physics/rubber/rubber_tire_impact_hard"..math.random(1,3)..".wav", 75, 100)
+            end
+        end    
+    end )
+    chip():emitSound("coach/coach_go_here.wav")
+end

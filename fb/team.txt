@@ -1,0 +1,94 @@
+--[[
+MIT License
+
+Copyright (c) 2016 suun
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+--]]
+
+fbteams = {}
+
+
+function newteam(name)
+    fbteams[name] = {goals=0}
+end
+
+function addplayer(name, player)
+    table.insert(fbteams[name], player)
+end
+
+function removeplayer(name, player)
+    for k, v in pairs(fbteams[name]) do
+        if v == player then
+            table.remove(fbteams[name], k)
+            return true
+        end
+    end
+    return false
+end    
+
+function goalteam(name)
+    fbteams[name].goals = fbteams[name].goals + 1
+    return fbteams[name].goals
+end    
+
+hook.add("Command", "Football_teams", function(cmd, args, text)
+    if cmd ~= "team" then return end
+    local action = table.remove(args, 1)
+    
+    if action == "create" then
+        local name = args[1]
+        if fbteams[name] then
+            print("\"" .. name .. "\" already exists!")
+        else
+            newteam(name)
+            print("Created team \"" .. name .. "\"")
+        end
+    elseif action == "add" then
+        local name = table.remove(args, 1)
+        local players = args
+        for k, v in pairs(players) do
+            local ply = util.FindPlayerByName(v)
+            if ply then
+                print("Added \"" .. ply:getName() .. "\" to \"" .. name .. "\"")
+                addplayer(name, util.FindPlayerByName(v))
+            else
+                print("Can't find \"" .. v .. "\"")
+            end
+        end
+    elseif action == "remove" then
+        local name = table.remove(args, 1)
+        local players = args
+        for k, v in pairs(players) do
+            local ply = util.FindPlayerByName(v)
+            if ply then
+                if removeplayer(name, ply) then
+                    print("Removed \"" .. ply:getName() .. "\" from \"" .. name .. "\"")
+                end
+            else
+                print("Can't find \"" .. v .. "\"")
+            end
+        end
+    elseif action == "goal" then
+        local name = table.remove(args, 1)
+        hook.run("Goal", name, goalteam(name))
+    elseif action == "debug" then
+        printTable(fbteams)
+    end
+end)    

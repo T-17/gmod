@@ -1,0 +1,117 @@
+--[[
+MIT License
+
+Copyright (c) 2016 suun
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+--]]
+
+--@name Football
+--@author suun
+--@model models/props_c17/consolebox01a.mdl
+--@shared
+
+
+--[[ Required files ]]--
+--@include lib/util.txt
+--@include fb/goal.txt
+--@include fb/team.txt
+--@include fb/chat.txt
+--@include fb/ent.txt
+
+util = require "lib/util.txt"
+Class = util.Class
+
+require "fb/goal.txt"
+require "fb/team.txt"
+require "fb/chat.txt"
+require "fb/ent.txt"
+
+
+if SERVER then
+-- Test holograms functionality (often broken)
+try(function()
+    local h = holograms.create(Vector(0, 0, 0), Angle(0, 0, 0), "models/props_c17/FurnitureWashingmachine001a.mdl", Vector(1, 1, 1))
+    h:setColor(Color(255, 0, 0))
+    h:remove()
+    workholos = true
+end, function()
+    print("[Warning] Holograms are broken on this server!")
+    workholos = false
+end)
+
+
+local defaultModel = "models/props_phx/misc/soccerball.mdl"
+local footballs = {}
+
+local function setStatus()
+    local name = "=== Football === ]\n"
+
+    -- Score
+    name = name .. "[ === Score === ]\n"
+    for k, v in pairs(fbteams) do
+        name = name .. k .. ": " .. (v.goals or 0) .. "\n"
+    end
+    name = name .. "[ ==="
+    setName(name)
+end
+
+if setName then
+    timer.create("SetStatus", 1, 0, setStatus)
+end
+
+hook.add("Command", "SpawnFootball", function(cmd, args)
+    if cmd ~= "fb" then return end
+    local count = tonumber((args[1]=="-" or (not args[1])) and 1 or args[1])
+    local model = (args[2]=="-" or (not args[2])) and defaultModel or args[2]
+    local mul =   tonumber((args[3]=="-" or (not args[3])) and 1 or args[3])
+
+    local n = 1
+    timer.create("SpawnFootballs", 1/prop.spawnRate(), count, function()
+        if not prop.canSpawn() then return end
+        footballs[#footballs+1] = Football(chip():getPos() + Vector(0, 0, 50), model, mul)
+        n = n + 1
+    end)
+end)
+
+hook.add("Command", "Save", function(cmd, args)
+    if cmd ~= "session" then return end
+    local action = table.remove(args, 1)
+    local name = args[1] or "nil"
+    if action == "save" then
+        local data = von.serialize(fbteams)
+        globaltables.global[name:lower()] = data
+        print("Saved session")
+    elseif action == "load" then
+        fbteams = von.deserialize(globaltables.global[name:lower()])
+        print("Loaded session")
+    end
+end)    
+
+
+
+
+-------------------
+elseif CLIENT then
+-------------------
+
+
+
+
+end

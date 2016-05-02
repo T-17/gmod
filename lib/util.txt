@@ -1,0 +1,526 @@
+--[[
+MIT License
+
+Copyright (c) 2016 suun
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+--]]
+--@name Util
+--@author suunrider
+
+
+Util = {}
+
+
+--[[---------------------------------------------------------
+		Name: Copy
+		Desc: Copies a table
+-----------------------------------------------------------]]
+
+function Util.Copy( tbl )
+	local copy = {}
+	for k, v in pairs( tbl ) do
+		copy[ k ] = v
+	end
+	return copy
+end
+
+
+--[[---------------------------------------------------------
+		Name: WriteTable
+		Desc: Writes a table with the net library (using von)
+-----------------------------------------------------------]]
+
+function Util.WriteTable( tbl )
+    local dat = fastlz.compress( von.encode( tbl ) )
+    local size = #dat
+    
+    net.writeUInt( size, 32 )
+    net.writeData( dat, size )
+end
+
+
+--[[---------------------------------------------------------
+		Name: ReadTable
+		Desc: Reads a table with the net library (using von)
+-----------------------------------------------------------]]
+
+function Util.ReadTable()
+    local size = net.writeUInt( 32 )
+    local dat = net.readData( size )
+    local tbl = von.encode( fastlz.decompress( dat ) )
+    
+    return tbl
+end
+
+
+do
+	local netFuncs = {}
+
+--[[---------------------------------------------------------
+		Name: NetReceive
+		Desc: Calls a function if a net with specified name arrived
+-----------------------------------------------------------]]
+
+	function Util.NetReceive( name, func )
+		netFuncs[ name ] = func
+	end
+
+
+	hook.add( "net", "NetReceive", function( name, len, ply )
+		if netFuncs[ name ] then
+			netFuncs[ name ]( len, ply )
+		end
+	end )
+
+end
+
+
+do
+  --[[---------------------------------------------------------
+    Name: class.lua
+    Desc: Creates a class
+    Usage: Declare the "new" method to create a constructor
+  -----------------------------------------------------------]]
+
+  local function callConstructor( class, obj, ... )
+    local meta = getmetatable(class)
+    if #meta.__super > 0 then
+      if class.superArgs then
+        for k, v in ipairs( meta.__super ) do
+          callConstructor( v, obj, class.superArgs( ... ) )
+        end
+      else
+        for k, v in ipairs( meta.__super ) do
+          callConstructor( v, obj )
+        end
+      end
+    end
+    if class.new then
+      class.new( obj, ... )
+    end
+  end
+
+  local function instantiate( class, ... )
+    local cl = setmetatable( {}, {
+        __index = class
+    } )
+    callConstructor( class, cl, ... )
+    return cl
+  end
+
+  function Util.Class( ... )
+    local arg = { ... }
+    local cl = {}
+    setmetatable( cl, {
+        __index = function( self, key )
+          if key ~= "new" then
+            local mtb = getmetatable( self )
+            for k, v in ipairs( mtb.__super ) do
+              if v[ key ] then
+                return v[ key ]
+              end
+            end
+            return nil
+          end
+        end,
+        __super = arg,
+        __call = instantiate,
+    } )
+    return cl
+  end
+  class = Util.Class 
+end
+
+
+
+
+
+do
+
+	local globals = {}
+
+
+	local function write( value )
+		net.writeString( type( value ) )
+		if type( value ) == "number" then
+			net.writeFloat( value )
+		elseif type( value ) == "string" then
+			net.writeString( value )
+		elseif type( value ) == "table" then
+			net.writeTable( value )
+		end
+	end
+
+
+	local function read()
+		local valType = net.readString()
+		if valType == "number" then
+			return net.readFloat()
+		elseif valType == "string" then
+			return net.readString()
+		elseif valType == "table" then
+			return net.readTable()
+		end
+	end
+
+
+	local function globalNew( name, value )
+		net.start( "newGlobal" )
+		net.writeString( name )
+		write( value )
+		net.send()
+	end
+
+
+	Util.NetReceive( "newGlobal", function()
+		local globalName = net.readString()
+		globals[ globalName ] = read()
+	end )
+
+
+
+
+
+
+--[[---------------------------------------------------------
+		Name: GlobalSet
+		Desc: Sets a global variable which is available on server and client
+-----------------------------------------------------------]]
+	function Util.GlobalSet( name, value )
+		globalNew( name, value )
+	end
+
+
+
+
+
+--[[---------------------------------------------------------
+		Name: GlobalGet
+		Desc: Returns the value of a global variable
+-----------------------------------------------------------]]
+
+	function Util.GlobalGet( name )
+		return globals[ name ]
+	end
+
+end
+
+
+
+
+
+
+--[[---------------------------------------------------------
+		Name: SendLua
+		Desc: Sends a lua script to client(s) and executes it
+-----------------------------------------------------------]]
+
+
+function Util.SendLua( code, ply )
+    if not ( net.getBytesLeft() > 0 ) then
+        Util.Delay( 5, function()
+            Util.SendLua( code, ply )
+        end )
+    else
+    	net.start( "sendlua" )
+    	net.writeString( code )
+    	net.send( ply )
+    end
+end
+
+
+Util.NetReceive( "sendlua", function()
+	local code = net.readString()
+	if type(code) ~= "string" then error( code ) end
+	local fn = loadstring( code )
+	if type( fn ) == "string" then
+		error( fn )
+	else
+		fn()
+	end
+end )
+
+
+
+--[[---------------------------------------------------------
+		Name: FindPlayerByName
+		Desc: Returns a player with the name
+-----------------------------------------------------------]]
+function Util.FindPlayerByName( name )
+	for _, ply in pairs( find.allPlayers() ) do
+		if ply:getName():lower():find( name:lower() ) then
+		    return ply
+		end
+	end
+end
+
+
+
+
+--[[---------------------------------------------------------
+		Name: Delay
+		Desc: Calls a function delayed
+		Info: Deprecated; use timer.simple
+-----------------------------------------------------------]]
+Util.Delay = timer.simple
+
+
+
+--[[---------------------------------------------------------
+	Name: SeeAll
+	Desc: Puts the contents of a table in the global environment
+-----------------------------------------------------------]]
+function Util.SeeAll( tbl )
+	for k, v in pairs( tbl ) do
+		_G[ k ] = v
+	end
+end
+
+
+
+
+--[[---------------------------------------------------------
+	Name: HasValue
+	Desc: Checks if a table contains a value and returns the path
+-----------------------------------------------------------]]
+function Util.HasValue( tbl, str, already, path )
+	already = already or {}
+	path = path or ""
+	for k, v in pairs( tbl ) do
+		if type(v) == "table" and not already[ v ] then
+			already[v] = true
+			local ret = Util.HasValue(v, str, already, path .. "." .. tostring(k))
+			if ret then
+				return ret
+			end
+		elseif tostring( v ) == str then
+			return path .. "." .. tostring(k)
+		end
+	end
+end
+
+
+
+
+
+
+
+--[[---------------------------------------------------------
+   Name: Explode(seperator ,string)
+   Desc: Takes a string and turns it into a table
+   Usage: Util.Explode( " ", "Seperate this string")
+   Info: Deprecated; use string.explode
+-----------------------------------------------------------]]
+local string_gmatch = string.gmatch
+Util.Explode = string.explode
+
+
+
+
+
+--[[---------------------------------------------------------
+	Name: Stack
+	Desc: FILO Stack
+	Usage: :push to push a var onto stack
+	       :pop to pop off at the top of stack
+-----------------------------------------------------------]]
+
+Util.Stack = Util.Class()
+
+function Util.Stack:new()
+	self.stack = {}
+end
+
+function Util.Stack:push( v )
+	self.stack[ #self.stack + 1 ] = v
+end
+
+function Util.Stack:pop()
+	local r = self.stack[ #self.stack ]
+	self.stack[ #self.stack ] = nil
+	return r
+end
+
+
+
+
+
+
+--[[---------------------------------------------------------
+	Name: BufferedPropSpawn
+	Desc: Spawns a prop and saves it in a BufferedProp class
+-----------------------------------------------------------]]
+if SERVER and prop then
+    
+local bufferedProps = {}
+timer.create( "SpawnBufferedProp", 0.3, 0, function()
+    if prop.canSpawn() and #bufferedProps > 0 then
+        local propInfo = table.remove( bufferedProps, 1 )
+        local p = prop.create( propInfo.pos, propInfo.ang, propInfo.model, true )
+        if propInfo.cb then -- call callback
+            propInfo.cb( p )
+        end
+    end
+end )
+function Util.BufferedPropSpawn( pos, ang, model, cb )
+    table.insert( bufferedProps, { pos=pos, ang=ang, model=model, cb=cb } )
+end
+
+end
+
+--[[---------------------------------------------------------
+	Name: FileWrite
+	Desc: Like file.write but on serverside
+-----------------------------------------------------------]]
+if SERVER then
+    function Util.FileWrite( filename, content )
+        local dat = fastlz.compress(content)
+        net.start( "FileWrite" )
+        net.writeString( filename )
+        net.writeUInt( #dat, 32 )
+        net.writeData( dat, #dat )
+        net.send()
+    end
+else
+    if player() == owner() then
+        Util.NetReceive( "FileWrite", function()
+            local filename = net.readString()
+            local size = net.readUInt( 32 )
+            local content = fastlz.decompress( net.readData( size ) )
+            file.write( filename, content )
+        end )
+    end
+end
+
+
+--[[---------------------------------------------------------
+	Name: FileRead
+	Desc: Like file.read but on serverside
+-----------------------------------------------------------]]
+if SERVER then
+    local callbacks = {}
+    function Util.FileRead( filename, callback )
+        net.start( "FileRead" )
+        net.writeString( filename )
+        net.send()
+        callbacks[ filename ] = callback
+    end
+
+    Util.NetReceive( "FileContent", function()
+        local found = net.readBit()
+        local filename = net.readString()
+        local size = net.readInt( 32 )
+        local dat = net.readData( size )
+        local content = fastlz.decompress( dat )
+        if callbacks[ filename ] then
+            callbacks[ filename ]( content, found )
+        end
+    end )
+
+else
+    if player() == owner() then
+        Util.NetReceive( "FileRead", function()
+            local found, filename, content, dat
+            filename = net.readString()
+            found = file.exists(filename)
+            if found then
+                content = file.read( filename )
+            else
+                content = "404"
+            end
+            dat = fastlz.compress( content )
+            net.start( "FileContent" )
+            net.writeBit(found)
+            net.writeString( filename )
+            net.writeInt( #dat, 32 )
+            net.writeData( dat, #dat )
+            net.send()
+        end )
+    end
+end
+
+
+
+
+--[[---------------------------------------------------------
+
+    Custom util hooks like Tick and UseEntity.
+
+
+	Name: HookEnable
+	Desc: Enables a hook
+-----------------------------------------------------------]]
+
+local customHooks = {}
+
+function Util.EnableHook( name )
+	if customHooks[ name ] then
+		customHooks[ name ]()
+	end
+end
+
+
+
+--[[---------------------------------------------------------
+	Hook: Tick
+	Desc: Gets called every tick with deltatime as parameter
+-----------------------------------------------------------]]
+
+customHooks[ "Tick" ] = function()
+
+    local lasttime = timer.curtime()
+
+    hook.add( "think", "Think", function()
+
+    	local dt = timer.curtime() - lasttime
+    	hook.run( "Tick", dt )
+
+    	lasttime = timer.curtime()
+
+    end )
+
+end
+
+
+
+--[[---------------------------------------------------------
+	Hook: UseEntity
+	Desc: Gets called when a player uses an entity
+-----------------------------------------------------------]]
+
+customHooks[ "UseEntity" ] = function()
+
+	hook.add( "think", "UseEntity", function()
+
+		for _, ply in pairs( find.allPlayers() ) do
+			if ply:isValid() and ply:isPlayer() and ply:keyDown( KEY.W ) then
+				local e = ply:getEyeTrace().Entity
+				if e and e:isValid() and e:getPos():getDistance( ply:getPos() ) < 100 then
+					hook.run( "UseEntity", ply, e )
+				end
+			end
+    	end
+
+    end )
+
+end
+
+
+return Util
