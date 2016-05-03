@@ -42,7 +42,7 @@ hook.add("Command", "Goal", function(cmd, args)
         end
         selecting = {}
         selecting.name = name
-        selecting.holo = holograms.create(vec2vec(owner():getEyeTrace().HitPos), Angle(0, 0, -90), "models/props_junk/TrashDumpster02.mdl", Vector(1,1,1))
+        selecting.holo = holograms.create(owner():getEyeTrace().HitPos, Angle(0, 0, -90), "models/props_junk/TrashDumpster02.mdl", Vector(1,1,1))
     elseif action == "remove" then
         if not goal then
             print("You need to look at an entity!")
@@ -72,7 +72,7 @@ hook.add("KeyPress", "Select", function(ply, key)
     if ply ~= owner() then return end
     if key == 32 then -- E
         
-        local e = prop.create(vec2vec(owner():getEyeTrace().HitPos), selecting.holo:getAngles(), "models/props_junk/TrashDumpster02.mdl", Vector(1,1,1))
+        local e = prop.create(owner():getEyeTrace().HitPos, selecting.holo:getAngles(), "models/props_junk/TrashDumpster02.mdl", Vector(1,1,1))
             
         fbteams[selecting.name].goal = e
         goals[e:entIndex()] = {name=selecting.name}
