@@ -24,10 +24,6 @@ SOFTWARE.
 
 local curtime = timer.curtime
 
-local function vec2vec(vec)
-    return Vector(vec.x, vec.y, vec.z)
-end
-
 goals = {}
 
 local selecting
@@ -65,7 +61,7 @@ end)
 
 hook.add("think", "Select", function()
     if not selecting then return end
-    selecting.holo:setPos(vec2vec(owner():getEyeTrace().HitPos))
+    selecting.holo:setPos(owner():getEyeTrace().HitPos)
 end)
 
 
