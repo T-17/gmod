@@ -1,0 +1,252 @@
+-- powerful - The multi-functional starfall library
+
+pw = {}
+local pw = pw
+
+-- Networking: {{{
+do
+	pw.net = {}
+
+	local net, fastlz, von = net, fastlz, von
+	-- Constants
+	local PW_NET_MSG = "P"
+	local PW_NET_REG = "R"
+
+	local nameToID = {}
+	local IDToName = {}
+
+	if SERVER then
+		function pw.net.register(name)
+			local id = #IDToName+1
+			IDToName[id] = name
+			nameToID[name] = id
+
+			local data = fastlz.compress(name)
+
+			-- TODO: Use a buffer instead of creating a hook for every register
+			hook.add("ClientLoaded", "Register:" .. name, function()
+				net.start(PW_NET_REG)
+					net.writeUInt(id, 16)
+					net.writeUInt(#data, 32)
+					net.writeData(data, #data)
+				net.send()
+			end)
+
+			return id
+		end
+	end
+
+	function pw.net.start(name)
+		local id = nameToID[name]
+		if not id then throw("Unregistered message: " .. name) end
+		net.start(PW_NET_MSG)
+		net.writeUInt(id, 16)
+	end
+
+	local callbacks = {}
+
+	function pw.net.onMessage(id, callback)
+		callbacks[id] = callback
+	end
+
+	hook.add("net", "pw.net", function(name, len, ply)
+		-- Check if it is a powerful netmessage
+		if name == PW_NET_REG and CLIENT then
+			local id = net.readUInt(16)
+			local size = net.readUInt(32)
+			local data = net.readData(size)
+			local name = fastlz.decompress(data)
+			IDToName[id] = name
+			nameToID[name] = id
+			print("Registering " .. name .. ";" .. id)
+		elseif name == PW_NET_MSG then
+			local id = net.readUInt(16)
+			local name = IDToName[id]
+			if not name then
+				throw("pw.net: Unregistered ID: " .. id)
+			end
+
+			if callbacks[name] then
+				callbacks[name](len, ply)
+			end
+		end
+	end)
+
+	-- Other net functions
+	pw.net.writeString = function(s)
+		-- Don't compress if it is smaller than 20 characters
+		if #s < 20 then
+			net.writeBit(false)
+			net.writeString(s)
+		else
+			net.writeBit(true)
+			local data = fastlz.compress(s)
+			net.writeUInt(#data, 32)
+			net.writeData(data, #data)
+		end
+	end
+
+	pw.net.readString = function()
+		local isCompressed = net.readBit() ~= 0
+		if isCompressed then
+			local size = net.readUInt(32)
+			local data = net.readData(size)
+			return fastlz.decompress(data)
+		else
+			return net.readString()
+		end
+	end
+
+	pw.net.writeUInt = net.writeUInt
+	pw.net.writeInt  = net.writeInt
+	pw.net.writeFloat = net.writeFloat
+	pw.net.writeTable = function(tbl)
+		pw.net.writeString(von.encode(tbl))
+	end
+	pw.net.readTable = pw.net.readString
+	-- TODO: Add rest
+
+end
+-- }}}
+
+-- Global variables: {{{
+do
+	if SERVER then
+		pw.net.register("newGlobal")
+		pw.net.register("setGlobal")
+	end
+
+	local IDToName = {}
+	local nameToID = {}
+	local nameToType = {}
+
+
+	local typeToID = {
+		["nil"]    = 0,
+		["number"] = 1,
+		["string"] = 2,
+		["table"]  = 3,
+	}
+	local IDToType = {}
+
+	for k, v in pairs(typeToID) do
+		IDToType[v] = k
+	end
+
+	local sendFuncs = {
+		["number"] = net.writeFloat,
+		["string"] = pw.net.writeString,
+	}
+
+	local receiveFuncs = {
+		["number"] = net.readFloat,
+		["string"] = pw.net.readString,
+	}
+
+
+	local globals = {} 
+
+	local function setGlobal(_, name, value)
+		-- New value -> register
+		if not globals[name] then
+			local id = #IDToName + 1
+			IDToName[id] = name
+			nameToID[name] = id
+
+			local typeID = typeToID[type(value)]
+			if not typeID then throw("Unsupported type: " .. type(value)) end
+
+			pw.net.start("newGlobal")
+				net.writeUInt(id, 32)
+				net.writeUInt(typeID, 16)
+				pw.net.writeString(name)
+			net.send()
+		end
+		local id = nameToID[name]
+
+		globals[name] = value
+		pw.net.start("setGlobal")
+			net.writeUInt(id, 32)
+			sendFuncs[type(value)](value)
+		net.send()
+	end
+
+	local function getGlobal(_, name)
+		return globals[name]
+	end
+
+	pw.globals = setmetatable({}, {
+		-- set a global value
+		__newindex = setGlobal,
+
+		-- read a global value
+		__index = getGlobal,
+	})
+
+	pw.net.onMessage("newGlobal", function()
+		local id = net.readUInt(32)
+		local type = IDToType[net.readUInt(16)]
+		local name = pw.net.readString()
+
+		nameToID[name] = id
+		IDToName[id] = name
+		nameToType[name] = type
+	end)
+
+	pw.net.onMessage("setGlobal", function()
+		local id = net.readUInt(32)
+		local name = IDToName[id]
+		local type = nameToType[name]
+		globals[name] = receiveFuncs[type]()
+	end)
+end
+-- }}}
+
+-- Utility: {{{
+-- pw.print(s)
+-- Prints to owner, even if called on other client
+if SERVER then
+	local net = net
+	pw.net.onMessage("pw.printServer", function()
+		print(net.readString())
+	end)
+
+	function pw.print(s)
+		print(s)
+	end
+elseif CLIENT then
+	if player() == owner() then 
+		-- print() works on owner's client so skip networking
+		function pw.print(s)
+			print(s)
+		end
+	else
+		function pw.print(s)
+			net.start("pw.printServer")
+				net.writeString(s)
+			net.send()
+		end
+	end
+end
+
+
+-- Client info on server:
+-- pw.clientLoaded on server
+-- "ClientLoaded" hook gets called on server
+if SERVER then
+	pw.clientLoaded = false
+
+	hook.add("net", "pw.clientLoaded", function(name)
+		if name ~= "ClientLoaded" then return end
+		pw.clientLoaded = true
+		hook.run("ClientLoaded")
+	end)
+else
+	if player() == owner() then
+		net.start("ClientLoaded")
+		net.send()
+	end
+end
+-- }}}
+
+-- vim: ft=lua
