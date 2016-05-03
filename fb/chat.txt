@@ -33,3 +33,5 @@ hook.add("PlayerSay", "Football_Chat", function(ply, text)
     
     hook.run("Command", cmd, args, text)
 end)
+
+-- vim: ft=lua

@@ -233,3 +233,5 @@ function Football:new(pos, model, mul)
     end )
     chip():emitSound("coach/coach_go_here.wav")
 end
+
+-- vim: ft=lua

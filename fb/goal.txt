@@ -90,3 +90,5 @@ hook.add("KeyPress", "Select", function(ply, key)
         selecting.holo:setAngles(ang)
     end
 end)    
+
+-- vim: ft=lua

@@ -92,3 +92,5 @@ hook.add("Command", "Football_teams", function(cmd, args, text)
         printTable(fbteams)
     end
 end)    
+
+-- vim: ft=lua
