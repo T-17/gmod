@@ -1,4 +1,5 @@
-# Football
+![](http://i.imgur.com/aBKQs5K.png)
+
 Commands
   - `?team create <team-name>`
   - `?team add <team-name> <player-name1> <player-name2> ...`
