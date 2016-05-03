@@ -72,9 +72,7 @@ local function setStatus()
     setName(name)
 end
 
-if setName then
-    timer.create("SetStatus", 1, 0, setStatus)
-end
+timer.create("SetStatus", 1, 0, setStatus)
 
 hook.add("Command", "SpawnFootball", function(cmd, args)
     if cmd ~= "fb" then return end
