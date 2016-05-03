@@ -101,17 +101,6 @@ hook.add("Command", "Save", function(cmd, args)
         print("Loaded session")
     end
 end)    
-
-
-
-
--------------------
-elseif CLIENT then
--------------------
-
-
-
-
 end
 
 -- vim: ft=lua
