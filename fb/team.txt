@@ -71,10 +71,10 @@ hook.add("Command", "Football_teams", function(cmd, args, text)
         local name = table.remove(args, 1)
         local players = args
         for k, v in pairs(players) do
-            local ply = util.FindPlayerByName(v)
+            local ply = pw.findPlayerByName(v)
             if ply then
                 print("Added \"" .. ply:getName() .. "\" to \"" .. name .. "\"")
-                addplayer(name, util.FindPlayerByName(v))
+                addplayer(name, pw.findPlayerByName(v))
             else
                 print("Can't find \"" .. v .. "\"")
             end
@@ -83,7 +83,7 @@ hook.add("Command", "Football_teams", function(cmd, args, text)
         local name = table.remove(args, 1)
         local players = args
         for k, v in pairs(players) do
-            local ply = util.FindPlayerByName(v)
+            local ply = pw.findPlayerByName(v)
             if ply then
                 if removeplayer(name, ply) then
                     print("Removed \"" .. ply:getName() .. "\" from \"" .. name .. "\"")

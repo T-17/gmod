@@ -75,7 +75,7 @@ local layouts = {
         [3] = red,
     },
 }
-Football = Class()
+Football = pw.class()
 
 
 function Football:hitNormal(ply)

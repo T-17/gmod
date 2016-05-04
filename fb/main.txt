@@ -35,14 +35,13 @@ SOFTWARE.
 
 
 --[[ Required files ]]--
---@include lib/util.txt
+--@include lib/powerful.txt
 --@include fb/goal.txt
 --@include fb/team.txt
 --@include fb/chat.txt
 --@include fb/ent.txt
 
-util = require "lib/util.txt"
-Class = util.Class
+require "lib/powerful.txt"
 
 require "fb/goal.txt"
 require "fb/team.txt"
