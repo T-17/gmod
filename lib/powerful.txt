@@ -287,6 +287,44 @@ do
 end
 -- }}}
 
+-- I/O: {{{
+if SERVER then
+	local wire = wire
+
+	do -- Wire I/O Control
+		local function getNamesTypes(t)
+			local names, types = {}, {}
+			local i = 1
+			for k, v in pairs(t) do
+				names[i] = k 
+				types[i] = v
+				i = i + 1
+			end
+
+			return names, types
+		end
+		-- Format: {
+		-- 	[name] = type,
+		-- }
+		function pw.setInputs(tbl)
+			wire.adjustInputs(getNamesTypes(tbl))
+		end
+
+		function pw.setOutputs(tbl)
+			wire.adjustOutputs(getNamesTypes(tbl))
+		end
+	end
+
+	do -- Wire I/O Cache
+		pw.inputs = {}
+
+		hook.add("input", "powerful cache", function(name, value)
+			pw.inputs[name] = value
+		end)
+	end
+end
+-- }}}
+
 -- Utility: {{{
 
 -- pw.findPlayerByName(s)
