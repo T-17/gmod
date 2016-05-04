@@ -22,6 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 --]]
 
+--  _____           _   _           _ _ 
+-- |  ___|__   ___ | |_| |__   __ _| | |
+-- | |_ / _ \ / _ \| __| '_ \ / _` | | |
+-- |  _| (_) | (_) | |_| |_) | (_| | | |
+-- |_|  \___/ \___/ \__|_.__/ \__,_|_|_|
+
 --@name Football
 --@author suun
 --@model models/props_c17/consolebox01a.mdl
