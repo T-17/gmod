@@ -288,6 +288,21 @@ end
 -- }}}
 
 -- Utility: {{{
+
+-- pw.findPlayerByName(s)
+do
+	local find, pairs = find, pairs
+
+	function pw.findPlayerByName(s)
+		local players = find.allPlayers()
+		s = s:lower()
+		for _, p in pairs(players) do
+			if p:getName():lower():find(s) then
+				return p
+			end
+		end
+	end
+
 -- pw.print(s)
 -- Prints to owner, even if called on other client
 if SERVER then
