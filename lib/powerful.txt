@@ -29,8 +29,7 @@ SOFTWARE.
 -- |_|   \___/ \_/\_/ \___|_|  |_|  \__,_|_|
 -- The multi-functional starfall library
 
-pw = {}
-local pw = pw
+local pw = {}
 
 -- OOP: {{{
 do
@@ -387,5 +386,7 @@ else
 	end
 end
 -- }}}
+
+return pw
 
 -- vim: ft=lua
