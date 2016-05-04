@@ -53,13 +53,19 @@ do
 			local data = fastlz.compress(name)
 
 			-- TODO: Use a buffer instead of creating a hook for every register
-			hook.add("ClientLoaded", "Register:" .. name, function()
+			local function send()
 				net.start(PW_NET_REG)
 					net.writeUInt(id, 16)
 					net.writeUInt(#data, 32)
 					net.writeData(data, #data)
 				net.send()
-			end)
+			end
+
+			if pw.net.clientLoaded then
+				send()
+			else
+				hook.add("ClientLoaded", "Register:" .. name, send)
+			end
 
 			return id
 		end
