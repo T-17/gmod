@@ -58,7 +58,6 @@ do
 			local name = fastlz.decompress(data)
 			IDToName[id] = name
 			nameToID[name] = id
-			print("Registering " .. name .. ";" .. id)
 		elseif name == PW_NET_MSG then
 			local id = net.readUInt(16)
 			local name = IDToName[id]
