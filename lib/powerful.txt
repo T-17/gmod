@@ -32,6 +32,57 @@ SOFTWARE.
 pw = {}
 local pw = pw
 
+-- OOP: {{{
+do
+  local function callConstructor(class, obj, ...)
+    local meta = getmetatable(class)
+    if #meta.__super > 0 then
+      if class.superArgs then
+        for k, v in ipairs(meta.__super) do
+          callConstructor(v, obj, class.superArgs(...))
+        end
+      else
+        for k, v in ipairs(meta.__super) do
+          callConstructor(v, obj)
+        end
+      end
+    end
+    if class.new then
+      class.new(obj, ...)
+    end
+  end
+
+  local function instantiate(class, ...)
+    local cl = setmetatable({}, {
+        __index = class
+    })
+    callConstructor(class, cl, ...)
+    return cl
+  end
+
+  function pw.class(...)
+    local arg = {...}
+    local cl = {}
+    setmetatable(cl, {
+        __index = function(self, key)
+          if key ~= "new" then
+            local mtb = getmetatable(self)
+            for k, v in ipairs(mtb.__super) do
+              if v[key] then
+                return v[key]
+              end
+            end
+            return nil
+          end
+        end,
+        __super = arg,
+        __call = instantiate,
+    } )
+    return cl
+  end
+end
+-- }}}
+
 -- Networking: {{{
 do
 	pw.net = {}
