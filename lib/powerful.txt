@@ -326,6 +326,22 @@ end
 
 -- Utility: {{{
 
+do
+	local Angle, Vector = Angle, Vector
+	local random = math.random
+	function pw.randVector(min, max)
+		min = min or -1
+		max = max or 1
+		return Vector(random(min, max), random(min, max), random(min, max))
+	end
+
+	function pw.randAngle(min, max)
+		min = min or -180
+		max = max or 180
+		return Angle(random(min, max), random(min, max), random(min, max))
+	end
+end
+
 -- pw.findPlayerByName(s)
 do
 	local find, pairs = find, pairs
