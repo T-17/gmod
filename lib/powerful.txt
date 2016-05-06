@@ -286,6 +286,20 @@ do
 end
 -- }}}
 
+-- Anonymous Hooks: {{{
+do
+	local counter = 1
+
+	function pw.hook(name, callback)
+		hook.add(name, "Anonymous Hook: " .. counter, function()
+			callback()
+			hook.remove(name, "Anonymous Hook: " .. counter)
+		end)
+		counter = counter + 1
+	end
+end
+-- }}}
+
 -- I/O: {{{
 if SERVER then
 	local wire = wire
