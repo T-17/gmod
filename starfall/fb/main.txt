@@ -62,7 +62,7 @@ local function setStatus()
         name = name .. k .. ": " .. (v.goals or 0) .. "\n"
     end
     name = name .. "[ ==="
-    setName(name)
+    pw.setName(name)
 end
 
 timer.create("SetStatus", 1, 0, setStatus)
