@@ -92,19 +92,15 @@ end
 
 function Football:hitStrong(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = (ply:getAimVector()+pw.randVec(-0.01, 0.01)) * 1250 * self.mul
-    if workholos then
-        self.trailholo:setTrails(10, 1, 5, 'trails/smoke', Color(128, 128, 255))
-    end
+    vel = (ply:getAimVector()+pw.randVector(-0.01, 0.01)) * 1250 * self.mul
+		self.e:setTrails(10, 1, 5, 'trails/smoke', Color(128, 128, 255))
     return vel
 end
 
 function Football:hitSuper(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = (vel:getNormalized() * 300 + (ply:getAimVector()+pw.randVec(-0.01, 0.01)) * 2000) * self.mul
-    if workholos then
-        self.trailholo:setTrails(10, 1, 5, 'trails/smoke', Color(128, 255, 128))
-    end
+    vel = (vel:getNormalized() * 300 + (ply:getAimVector()+pw.randVector(-0.01, 0.01)) * 2000) * self.mul
+		self.e:setTrails(10, 1, 5, 'trails/smoke', Color(128, 255, 128))
     return vel
 end
 
@@ -132,15 +128,9 @@ function Football:hitAim(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = ply:getAimVector() * 2000 * self.mul
     vel.z = clamp(0, 100)
-    self.trailholo:setTrails(10, 1, 5, 'trails/smoke', Color(255, 128, 128))
+    self.e:setTrails(10, 1, 5, 'trails/smoke', Color(255, 128, 128))
     return vel
 end    
-
-function Football:removeTrails()
-    if not workholos then return end
-    self.trailholo:removeTrails()
-    self.trailholo:setParent(self.e)
-end
 
 function Football:isHead(ply)
     local lPos = ply:worldToLocal(self.e:getPos())
@@ -160,11 +150,6 @@ function Football:new(pos, model, mul)
             self.e:setSubMaterial(k, v)
         end
     end
-    if workholos then
-        self.trailholo = holograms.create(self.e:getPos(), Angle(0, 0, 0), self.model, Vector(0.1, 0.1, 0.1))
-        self.trailholo:setColor(Color(0,0,0,0))
-        self.trailholo:setParent(self.e)
-    end
     self.e:addCollisionListener(function(data)
         local e = data.HitEntity
         local ply
@@ -180,12 +165,9 @@ function Football:new(pos, model, mul)
         if self.isShooting then
             self.isShooting = false
             self.e:setMass(80)
-            if workholos then
-                self.trailholo:unparent()
-            end
-            timer.create('RemoveTrail', 5, 1, function()
-                self:removeTrails()
-            end)
+            timer.create('RemoveTrail', 1, 1, function()
+                self.e:removeTrails()
+						end)
             return
         end
         
@@ -196,7 +178,7 @@ function Football:new(pos, model, mul)
             elseif self:isHead(ply) then
                 setVel = self:hitHead(ply) 
             elseif ply:keyDown(IN_KEY.USE) then
-                self:removeTrails()
+                self.e:removeTrails()
                 timer.remove('RemoveTrail')                
                 local onGround = trace(ply:getPos(),ply:getPos()-Vector(0,0,10)).Hit
     
@@ -207,21 +189,13 @@ function Football:new(pos, model, mul)
                     setVel = self:hitSuper(ply)
                 end
                 self.e:setMass(120)
-                if workholos then
-                    self.trailholo:setPos(self.e:getPos())
-                    self.trailholo:setParent(self.e)
-                end
                 self.isShooting = true
             elseif ply:keyDown(IN_KEY.WALK) then
                 setVel = self:hitTall(ply)
             elseif ply:keyDown(IN_KEY.DUCK) then
-                self:removeTrails()
+                self.e:removeTrails()
                 timer.remove('RemoveTrail')
                 setVel = self:hitAim(ply)
-                if workholos then
-                    self.trailholo:setPos(self.e:getPos())
-                    self.trailholo:setParent(self.e)    
-                end
                 self.isShooting = true
             elseif ply:keyDown(IN_KEY.RUN) then
                 setVel = self:hitRun(ply)

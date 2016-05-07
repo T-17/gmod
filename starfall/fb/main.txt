@@ -50,18 +50,6 @@ require "fb/ent.txt"
 
 
 if SERVER then
--- Test holograms functionality (often broken)
-try(function()
-    local h = holograms.create(Vector(0, 0, 0), Angle(0, 0, 0), "models/props_c17/FurnitureWashingmachine001a.mdl", Vector(1, 1, 1))
-    h:setColor(Color(255, 0, 0))
-    h:remove()
-    workholos = true
-end, function()
-    print("[Warning] Holograms are broken on this server!")
-    workholos = false
-end)
-
-
 local defaultModel = "models/props_phx/misc/soccerball.mdl"
 local footballs = {}
 
