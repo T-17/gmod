@@ -340,6 +340,32 @@ end
 
 -- Utility: {{{
 
+-- pw.setName - setName's serverside version
+if SERVER then
+	pw.net.register("setName")
+	function pw.setName(s)
+		if pw.clientLoaded then
+			timer.simple(1, function()
+				pw.net.start("setName")
+				pw.net.writeString(s)
+				net.send()
+			end)
+		else
+			pw.hook("ClientLoaded", function()
+				timer.simple(1, function()
+					pw.net.start("setName")
+					pw.net.writeString(s)
+					net.send()
+				end)
+			end)
+		end
+	end
+else
+	pw.net.onMessage("setName", function()
+		setName(pw.net.readString())
+	end)
+end
+
 do
 	local Angle, Vector = Angle, Vector
 	local random = math.random
