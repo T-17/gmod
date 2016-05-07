@@ -32,9 +32,6 @@ local trace = trace.trace
 local clamp = math.clamp
 local random = math.random
 local IN_KEY = IN_KEY
-local function randVec()
-    return Vector(random(-0.01, 0.01), random(-0.01, 0.01), 0)
-end    
 
 local function isfbplayer(ply)
     for _, team in pairs(fbteams) do
@@ -95,7 +92,7 @@ end
 
 function Football:hitStrong(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = (ply:getAimVector()+randVec()) * 1250 * self.mul
+    vel = (ply:getAimVector()+pw.randVec(-0.01, 0.01)) * 1250 * self.mul
     if workholos then
         self.trailholo:setTrails(10, 1, 5, 'trails/smoke', Color(128, 128, 255))
     end
@@ -104,7 +101,7 @@ end
 
 function Football:hitSuper(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = (vel:getNormalized() * 300 + (ply:getAimVector()+randVec()) * 2000) * self.mul
+    vel = (vel:getNormalized() * 300 + (ply:getAimVector()+pw.randVec(-0.01, 0.01)) * 2000) * self.mul
     if workholos then
         self.trailholo:setTrails(10, 1, 5, 'trails/smoke', Color(128, 255, 128))
     end
