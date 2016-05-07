@@ -41,7 +41,7 @@ SOFTWARE.
 --@include fb/chat.txt
 --@include fb/ent.txt
 
-require "lib/powerful.txt"
+pw = require "lib/powerful.txt"
 
 require "fb/goal.txt"
 require "fb/team.txt"
