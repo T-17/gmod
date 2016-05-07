@@ -15,36 +15,36 @@ I suggest using this football script with [Tek's Football Field](https://github.
 ## Controls
 
 ### Normal Shot
-Action: Touch the ball
+Action: Touch the ball  
 Power: 500
 
 ### Run Shot
-Action: Touch the ball while you run
+Action: Touch the ball while you run  
 Power: 700
 
 ### Head Shot
-Action: Touch the ball with your head
-Power: 750
+Action: Touch the ball with your head  
+Power: 750  
 
 ### Tall Shot
-Action: Touch the ball while you hold Alt; Shoots the ball in the air
-Power: 350
+Action: Touch the ball while you hold Alt; Shoots the ball in the air  
+Power: 350  
 
 ### Stop Shot
-Action: Touch the ball while you hold R; Stops the ball
-Power: 50
+Action: Touch the ball while you hold R; Stops the ball  
+Power: 50  
 
 ### Strong Shot
-Action: Touch the ball while you hold E,  Aim at target position
-Power: 1250
-Trail: Blue
+Action: Touch the ball while you hold E,  Aim at target position  
+Power: 1250 
+Trail: Blue  
 
 ### Super shot
-Action: Touch the ball while you hold E and jump, Aim at target position
-Power: 2300
-Trail: Green
+Action: Touch the ball while you hold E and jump, Aim at target position  
+Power: 2300  
+Trail: Green  
 
 ### Aim shot
-Action: Touch the ball while you crouch, Aim at target position
-Power: 2000
-Trail: Red
+Action: Touch the ball while you crouch, Aim at target position  
+Power: 2000 
+Trail: Red  
