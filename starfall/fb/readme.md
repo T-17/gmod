@@ -1,17 +1,50 @@
 ![](http://i.imgur.com/aBKQs5K.png)
 
-Commands
+Requires the [powerful](https://github.com/its-suun/gmod/tree/master/starfall/lib) library to be installed.
+
+### Commands
   - `?team create <team-name>`
   - `?team add <team-name> <player-name1> <player-name2> ...`
   - `?team remove <team-name> <player-name1> <player-name2> ...`
   - `?fb <amount> <model> <force-multiplier>` , use `-` to use the default value for a parameter
   - `?goal create <team-name>`, press `R` to rotate the goal and `E` to place it
 
-## Instructions
+Only players in a team can touch the ball.
+I suggest using this football script with [Tek's Football Field](https://github.com/its-suun/gmod/blob/master/expression2/tekFootballField.txt).
 
-### Strong shot
-To do a strong shot you need to hold e and run on it. You should aim at your target position and **NOT** at the ball.
-The ball will leave a blue trail if you made a strong shot.
+## Controls
+
+### Normal Shot
+Action: Touch the ball
+Power: 500
+
+### Run Shot
+Action: Touch the ball while you run
+Power: 700
+
+### Head Shot
+Action: Touch the ball with your head
+Power: 750
+
+### Tall Shot
+Action: Touch the ball while you hold Alt; Shoots the ball in the air
+Power: 350
+
+### Stop Shot
+Action: Touch the ball while you hold R; Stops the ball
+Power: 50
+
+### Strong Shot
+Action: Touch the ball while you hold E,  Aim at target position
+Power: 1250
+Trail: Blue
 
 ### Super shot
-To perform a super shot you need to do a strong shot while you are jumping. A super shot is stronger, but more inaccurate, than a strong shot. It will leave a green trail behind it.
+Action: Touch the ball while you hold E and jump, Aim at target position
+Power: 2300
+Trail: Green
+
+### Aim shot
+Action: Touch the ball while you crouch, Aim at target position
+Power: 2000
+Trail: Red
