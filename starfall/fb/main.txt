@@ -36,14 +36,12 @@ SOFTWARE.
 
 --[[ Required files ]]--
 --@include lib/powerful.txt
---@include fb/goal.txt
 --@include fb/team.txt
 --@include fb/chat.txt
 --@include fb/ent.txt
 
 pw = require "lib/powerful.txt"
 
-require "fb/goal.txt"
 require "fb/team.txt"
 require "fb/chat.txt"
 require "fb/ent.txt"
@@ -52,20 +50,6 @@ require "fb/ent.txt"
 if SERVER then
 local defaultModel = "models/props_phx/misc/soccerball.mdl"
 local footballs = {}
-
-local function setStatus()
-    local name = "=== Football === ]\n"
-
-    -- Score
-    name = name .. "[ === Score === ]\n"
-    for k, v in pairs(fbteams) do
-        name = name .. k .. ": " .. (v.goals or 0) .. "\n"
-    end
-    name = name .. "[ ==="
-    pw.setName(name)
-end
-
-timer.create("SetStatus", 1, 0, setStatus)
 
 hook.add("Command", "SpawnFootball", function(cmd, args)
     if cmd ~= "fb" then return end

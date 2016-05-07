@@ -33,7 +33,7 @@ fbteams = {}
 
 
 function newteam(name)
-    fbteams[name] = {goals=0}
+    fbteams[name] = {}
 end
 
 function addplayer(name, player)
@@ -48,11 +48,6 @@ function removeplayer(name, player)
         end
     end
     return false
-end    
-
-function goalteam(name)
-    fbteams[name].goals = fbteams[name].goals + 1
-    return fbteams[name].goals
 end    
 
 hook.add("Command", "Football_teams", function(cmd, args, text)
@@ -92,9 +87,6 @@ hook.add("Command", "Football_teams", function(cmd, args, text)
                 print("Can't find \"" .. v .. "\"")
             end
         end
-    elseif action == "goal" then
-        local name = table.remove(args, 1)
-        hook.run("Goal", name, goalteam(name))
     elseif action == "debug" then
         printTable(fbteams)
     end

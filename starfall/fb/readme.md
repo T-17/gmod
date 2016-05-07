@@ -7,7 +7,6 @@ Requires the [powerful](https://github.com/its-suun/gmod/tree/master/starfall/li
   - `?team add <team-name> <player-name1> <player-name2> ...`
   - `?team remove <team-name> <player-name1> <player-name2> ...`
   - `?fb <amount> <model> <force-multiplier>` , use `-` to use the default value for a parameter
-  - `?goal create <team-name>`, press `R` to rotate the goal and `E` to place it
 
 Only players in a team can touch the ball.
 I suggest using this football script with [Tek's Football Field](https://github.com/its-suun/gmod/blob/master/expression2/tekFootballField.txt).
