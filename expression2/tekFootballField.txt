@@ -46,7 +46,7 @@ if (first()) {
 	}
     holoAlpha(47, 0)
     propSpawnUndo(0)
-    PropIndex = 1 # MUST BE 1
+    PropIndex = 1 # must be 1
     Ball_Alpha = 255
         
     
@@ -55,9 +55,9 @@ if (first()) {
     # Tip: during developement of this field concept changed so many times that some of the 
     # settings below are either obsolete or shouldn't be changed at all otherwise the thing will break. Keep that in mind.
     
-    PropMode = 1 # PROPS WILL BE SPAWNED ALONG WALLS AND GOALS
+    PropMode = 1 # props will be spawned along walls and goals
     
-    # BORDER WALLS MATERIAL
+    # border wall's material
     Walls_Mat = "models/props_wasteland/wood_fence01a"
     
     # models/props_wasteland/wood_fence01a
@@ -66,92 +66,91 @@ if (first()) {
     # sprops/trans/misc/ls_m2
     # sprops/textures/sprops_wood2
     
-    # PHYSICAL BORDERS  
+    # physical borders  
     Sides_Margin = 100 # adds additional offset on the side walls so ball can pass ground borders (Default: 100 / Max: 300)
     Goal_Margins = 200 # adds offset on the goal walls[Default: 200 / Max: 200]
     
-    #FIELD PROPERTIES
+    # field properties
     SizeX = 2600        #LENGTH[Default: 2600 Max: 2600]
     SizeY = 900         #THICKNESS[Default: 900]
     
-    # TEAM COLORS
+    # team colors
     Team_RedColor = vec(255, 0, 0)
     Team_BlueColor = vec(0, 0, 255)
     
-    # GOAL PROPERTIES
+    # goal properties
     Goal_Width = 200        # This version does not support stretching. Please do not change from 200.
     Goal_Height = 100       # This version does not support stretching. Please do not change from 100.
     
-    Goal_OffsetZ = 0       # DECREASES GOAL HEIGHT.[Default: 0]
+    Goal_OffsetZ = 0        # decreases goal height (default: 0)
 
-    Goal_Depth = 100        #DEPTH FOR "BOXES" IN FRONT OF THE GOALS
-    Goal_TintAlpha = 150    #ALPHA FOR COLORED LINES IN GOALS
+    Goal_Depth = 100        # depth for "boxes" in front of the goals
+    Goal_TintAlpha = 150    # alpha for colored lines in goals
     
-    #LINES PROPERTIES
+    # lines properties
     Line_Thickness = 5
     Line_Height = 0.3
     
-    # SCOREBOARD PROPERTIES
-    ScoreBoard_Height = 300   # HEIGHT OF SCORE RINGS
+    # scoreboard properties
+    ScoreBoard_Height = 300   # height of score rings
     
     #################################################################################################
     
     # DEBUG
     Red_Score = 0
     Blue_Score = 0
-    #Ball = entity()
-    #################
+
     hint("Look at your ball and say \"!setball\" to set it as ball detected by the field.", 15)
     
-    # RING
+    # ring
     holoPos(1, holoEntity(0):toWorld(vec(0, 0, 0)))
     holoModel(1, "models/hunter/tubes/tube4x4x025.mdl")
     holoScaleUnits(1, vec(300, 300, Line_Height))
     holoMaterial(1, "debug/debugdrawflat")
     
-    # MIDLINE
+    # midline
     holoPos(2, holoEntity(0):toWorld(vec(0, 0, 0)))
     holoModel(2, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(2, vec(SizeY, Line_Thickness, Line_Height))
     holoMaterial(2, "debug/debugdrawflat")
     
-    # RIGHT SIDE
+    # right side
     holoPos(3, holoEntity(0):toWorld(vec(SizeY/2, 0, 0)))
     holoModel(3, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(3, vec(Line_Thickness, SizeX, Line_Height))
     holoMaterial(3, "debug/debugdrawflat")
     
-    # LEFT SIDE
+    # left side
     holoPos(4, holoEntity(0):toWorld(vec(-SizeY/2, 0, 0)))
     holoModel(4, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(4, vec(Line_Thickness, SizeX, Line_Height))
     holoMaterial(4, "debug/debugdrawflat")
     
-    # RED GOAL LINE RIGHT
+    # red goal line right
     holoPos(5, holoEntity(0):toWorld(vec((SizeY/2) - ((SizeY/2) - (Goal_Width/2))/2, SizeX/2, 0)))
     holoModel(5, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(5, vec((SizeY/2) - (Goal_Width/2) + Line_Thickness, Line_Thickness, Line_Height))
     holoMaterial(5, "debug/debugdrawflat")
     
-    # RED GOAL LINE LEFT
+    # red goal line left
     holoPos(6, holoEntity(0):toWorld(vec(-(SizeY/2) + ((SizeY/2) - (Goal_Width/2))/2, SizeX/2, 0)))
     holoModel(6, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(6, vec((SizeY/2) - (Goal_Width/2) + Line_Thickness, Line_Thickness, Line_Height))
     holoMaterial(6, "debug/debugdrawflat")
     
-    # BLUE GOAL LINE LEFT
+    # blue goal line left
     holoPos(7, holoEntity(0):toWorld(vec((SizeY/2) - ((SizeY/2) - (Goal_Width/2))/2, -SizeX/2, 0)))
     holoModel(7, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(7, vec((SizeY/2) - (Goal_Width/2) + Line_Thickness, Line_Thickness, Line_Height))
     holoMaterial(7, "debug/debugdrawflat")
     
-    # RED GOAL LINE LEFT
+    # red goal line left
     holoPos(8, holoEntity(0):toWorld(vec(-(SizeY/2) + ((SizeY/2) - (Goal_Width/2))/2, -SizeX/2, 0)))
     holoModel(8, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(8, vec((SizeY/2) - (Goal_Width/2) + Line_Thickness, Line_Thickness, Line_Height))
     holoMaterial(8, "debug/debugdrawflat")
     
-    # RED GOAL RIGHT RING
+    # red goal right ring
     holoPos(9, holoEntity(0):toWorld(vec((SizeY/2), SizeX/2, 0)))
     holoModel(9, "hq_tube")
     holoScaleUnits(9, vec(Line_Thickness*10, Line_Thickness*10, Line_Height))
@@ -161,7 +160,7 @@ if (first()) {
     holoClipEnabled(9, 2, 1)
     holoClip(9, 2, vec(0), vec(0, -1, 0), 0)
     
-    # RED GOAL LEFT RING
+    # red goal left ring
     holoPos(10, holoEntity(0):toWorld(vec(-(SizeY/2), SizeX/2, 0)))
     holoModel(10, "hq_tube")
     holoScaleUnits(10, vec(Line_Thickness*10, Line_Thickness*10, Line_Height))
@@ -171,7 +170,7 @@ if (first()) {
     holoClipEnabled(10, 2, 1)
     holoClip(10, 2, vec(0), vec(0, -1, 0), 0)
     
-    # RED GOAL LEFT RING
+    # red goal left ring
     holoPos(11, holoEntity(0):toWorld(vec((SizeY/2), -SizeX/2, 0)))
     holoModel(11, "hq_tube")
     holoScaleUnits(11, vec(Line_Thickness*10, Line_Thickness*10, Line_Height))
@@ -181,7 +180,7 @@ if (first()) {
     holoClipEnabled(11, 2, 1)
     holoClip(11, 2, vec(0), vec(0, 1, 0), 0)
     
-    # RED GOAL LEFT RING
+    # red goal left ring
     holoPos(12, holoEntity(0):toWorld(vec(-(SizeY/2), -SizeX/2, 0)))
     holoModel(12, "hq_tube")
     holoScaleUnits(12, vec(Line_Thickness*10, Line_Thickness*10, Line_Height))
@@ -191,7 +190,7 @@ if (first()) {
     holoClipEnabled(12, 2, 1)
     holoClip(12, 2, vec(0), vec(0, 1, 0), 0)
     
-    #RED GOAL TINTLINE
+    # red goal tintline
     holoPos(13 , holoEntity(0):toWorld(vec(0, SizeX/2, 0)))
     holoModel(13, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(13, vec(Goal_Width, Line_Thickness, Line_Height))
@@ -199,7 +198,7 @@ if (first()) {
     holoColor(13, Team_RedColor)
     holoAlpha(13, Goal_TintAlpha)
     
-    #BLUE GOAL TINTLINE
+    # blue goal tintline
     holoPos(14, holoEntity(0):toWorld(vec(0, -SizeX/2, 0)))
     holoModel(14, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(14, vec(Goal_Width, Line_Thickness, Line_Height))
@@ -207,21 +206,21 @@ if (first()) {
     holoColor(14, Team_BlueColor)
     holoAlpha(14, Goal_TintAlpha)
     
-    # RED GOAL RIGHT POST
+    # red goal right post
     holoPos(15, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)-(Goal_Width/2)), SizeX/2, -Goal_OffsetZ+Goal_Height/2)))
     holoModel(15, "hq_cylinder")
     holoScaleUnits(15, vec(Line_Thickness, Line_Thickness, Goal_Height))
     holoClipEnabled(15, 1)
     holoClip(15, vec(0, 0, (Goal_Height/2)-(Line_Thickness/2)), vec(1, 0, -1), 0)
     
-    # RED GOAL LEFT POST
+    # red goal left post
     holoPos(16, holoEntity(0):toWorld(vec(-(SizeY/2)+((SizeY/2)-(Goal_Width/2)), SizeX/2, -Goal_OffsetZ+Goal_Height/2)))
     holoModel(16, "hq_cylinder")
     holoScaleUnits(16, vec(Line_Thickness, Line_Thickness, Goal_Height))
     holoClipEnabled(16, 1)
     holoClip(16, vec(0, 0, (Goal_Height/2)-(Line_Thickness/2)), vec(-1, 0, -1), 0)
     
-    # RED GOAL TOP POST
+    # red goal top post
     holoPos(17, holoEntity(0):toWorld(vec(0, SizeX/2, -Goal_OffsetZ+Goal_Height-Line_Thickness/2)))
     holoAng(17, holoEntity(0):toWorld(ang(90, 0, 0)))
     holoModel(17, "hq_cylinder")
@@ -231,21 +230,21 @@ if (first()) {
     holoClipEnabled(17, 2, 1)
     holoClip(17, 2, vec(0, 0, -(Goal_Width/2)), vec(-1, 0, 1), 0)
     
-    # BLUE GOAL LEFT POST
+    # blue goal left post
     holoPos(18, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)-(Goal_Width/2)), -SizeX/2, -Goal_OffsetZ+Goal_Height/2)))
     holoModel(18, "hq_cylinder")
     holoScaleUnits(18, vec(Line_Thickness, Line_Thickness, Goal_Height))
     holoClipEnabled(18, 1)
     holoClip(18, vec(0, 0, (Goal_Height/2)-(Line_Thickness/2)), vec(1, 0, -1), 0)
     
-    # BLUE GOAL LEFT POST
+    # blue goal left post
     holoPos(19, holoEntity(0):toWorld(vec(-(SizeY/2)+((SizeY/2)-(Goal_Width/2)), -SizeX/2, -Goal_OffsetZ+Goal_Height/2)))
     holoModel(19, "hq_cylinder")
     holoScaleUnits(19, vec(Line_Thickness, Line_Thickness, Goal_Height))
     holoClipEnabled(19, 1)
     holoClip(19, vec(0, 0, (Goal_Height/2)-(Line_Thickness/2)), vec(-1, 0, -1), 0)
     
-    # BLUE GOAL TOP POST
+    # blue goal top post
     holoPos(20, holoEntity(0):toWorld(vec(0, -SizeX/2, -Goal_OffsetZ+Goal_Height-Line_Thickness/2)))
     holoAng(20, holoEntity(0):toWorld(ang(90, 0, 0)))
     holoModel(20, "hq_cylinder")
@@ -255,7 +254,7 @@ if (first()) {
     holoClipEnabled(20, 2, 1)
     holoClip(20, 2, vec(0, 0, -(Goal_Width/2)), vec(-1, 0, 1), 0)
     
-    # RED GOAL RIGHT ARCH
+    # red goal right arch
     holoPos(21, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)-(Goal_Width/2))+(Line_Thickness/2), SizeX/2, -Goal_OffsetZ)))
     holoAng(21, holoEntity(0):toWorld(ang(90, 180, 0)))
     holoModel(21, "models/hunter/tubes/tube4x4x025d.mdl")
@@ -263,7 +262,7 @@ if (first()) {
     holoMaterial(21, "models/debug/debugwhite")
     holoColor(21, Team_RedColor)
     
-    # RED GOAL LEFT ARCH
+    # red goal left arch
     holoPos(22, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)+(Goal_Width/2))+(Line_Thickness/2), SizeX/2, -Goal_OffsetZ)))
     holoAng(22, holoEntity(0):toWorld(ang(90, 180, 0)))
     holoModel(22, "models/hunter/tubes/tube4x4x025d.mdl")
@@ -271,28 +270,28 @@ if (first()) {
     holoMaterial(22, "models/debug/debugwhite")
     holoColor(22, Team_RedColor)
     
-    # RED GOAL MAIN FENCE ARCH
+    # red goal main fence arch
     holoPos(23, holoEntity(0):toWorld(vec(0, SizeX/2, -Goal_OffsetZ)))
     holoAng(23, holoEntity(0):toWorld(ang(90, 180, 0)))
     holoModel(23, "models/hunter/tubes/tube2x2x2d.mdl")
     holoScaleUnits(23, vec(Goal_Height, Goal_Height, Goal_Width))
     holoMaterial(23, "models/props_c17/fence_alpha")
     
-    # RED GOAL RIGHT ARCH FENCE
+    # red goal right arch fence
     holoPos(24, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)-(Goal_Width/2)), SizeX/2, -Goal_OffsetZ)))
     holoAng(24, holoEntity(0):toWorld(ang(90, 180, 0)))
     holoModel(24, "models/hunter/tubes/circle4x4d.mdl")
     holoScaleUnits(24, vec(Goal_Height, Goal_Height, Line_Thickness/2))
     holoMaterial(24, "models/props_c17/fence_alpha")
     
-    # RED GOAL LEFT ARCH FENCE
+    # red goal left arch fence
     holoPos(25, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)+(Goal_Width/2)), SizeX/2, -Goal_OffsetZ)))
     holoAng(25, holoEntity(0):toWorld(ang(90, 180, 0)))
     holoModel(25, "models/hunter/tubes/circle4x4d.mdl")
     holoScaleUnits(25, vec(Goal_Height, Goal_Height, Line_Thickness/2))
     holoMaterial(25, "models/props_c17/fence_alpha")
     
-    # BLUE GOAL LEFT ARCH
+    # blue goal left arch
     holoPos(26, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)-(Goal_Width/2))-(Line_Thickness/2), -SizeX/2, -Goal_OffsetZ)))
     holoAng(26, holoEntity(0):toWorld(ang(90, 0, 0)))
     holoModel(26, "models/hunter/tubes/tube4x4x025d.mdl")
@@ -300,7 +299,7 @@ if (first()) {
     holoMaterial(26, "models/debug/debugwhite")
     holoColor(26, Team_BlueColor)
     
-    # BLUE GOAL RIGHT ARCH
+    # blue goal right arch
     holoPos(27, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)+(Goal_Width/2))-(Line_Thickness/2), -SizeX/2, -Goal_OffsetZ)))
     holoAng(27, holoEntity(0):toWorld(ang(90, 0, 0)))
     holoModel(27, "models/hunter/tubes/tube4x4x025d.mdl")
@@ -308,64 +307,64 @@ if (first()) {
     holoMaterial(27, "models/debug/debugwhite")
     holoColor(27, Team_BlueColor)
     
-    # BLUE GOAL MAIN FENCE ARCH
+    # blue goal main fence arch
     holoPos(28, holoEntity(0):toWorld(vec(0, -SizeX/2, -Goal_OffsetZ)))
     holoAng(28, holoEntity(0):toWorld(ang(90, 0, 0)))
     holoModel(28, "models/hunter/tubes/tube2x2x2d.mdl")
     holoScaleUnits(28, vec(Goal_Height, Goal_Height, Goal_Width))
     holoMaterial(28, "models/props_c17/fence_alpha")
     
-    # BLUE GOAL RIGHT ARCH FENCE
+    # blue goal right arch fence
     holoPos(29, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)-(Goal_Width/2)), -SizeX/2, -Goal_OffsetZ)))
     holoAng(29, holoEntity(0):toWorld(ang(90, 0, 0)))
     holoModel(29, "models/hunter/tubes/circle4x4d.mdl")
     holoScaleUnits(29, vec(Goal_Height, Goal_Height, Line_Thickness/2))
     holoMaterial(29, "models/props_c17/fence_alpha")
     
-    # BLUE GOAL LEFT ARCH FENCE
+    # blue goal left arch fence
     holoPos(30, holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)+(Goal_Width/2)), -SizeX/2, -Goal_OffsetZ)))
     holoAng(30, holoEntity(0):toWorld(ang(90, 0, 0)))
     holoModel(30, "models/hunter/tubes/circle4x4d.mdl")
     holoScaleUnits(30, vec(Goal_Height, Goal_Height, Line_Thickness/2))
     holoMaterial(30, "models/props_c17/fence_alpha")
     
-    # RED GOAL BOX RIGHT
+    # red goal box right
     holoPos(31, holoEntity(0):toWorld(vec((Goal_Width), (SizeX/2)-(Goal_Depth), 0)))
     holoModel(31, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(31, vec(Line_Thickness, Goal_Depth*2, Line_Height))
     holoMaterial(31, "debug/debugdrawflat")
     
-    # RED GOAL BOX LEFT
+    # red goal box left
     holoPos(32, holoEntity(0):toWorld(vec((-Goal_Width), (SizeX/2)-(Goal_Depth), 0)))
     holoModel(32, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(32, vec(Line_Thickness, Goal_Depth*2, Line_Height))
     holoMaterial(32, "debug/debugdrawflat")
     
-    # RED GOAL BOX MIDDLE
+    # red goal box middle
     holoPos(33, holoEntity(0):toWorld(vec(0, (SizeX/2)-(Goal_Depth*2), 0)))
     holoModel(33, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(33, vec((Goal_Width*2)+Line_Thickness, Line_Thickness, Line_Height))
     holoMaterial(33, "debug/debugdrawflat")
     
-    # RED GOAL BOX LEFT
+    # red goal box left
     holoPos(34, holoEntity(0):toWorld(vec((Goal_Width), -(SizeX/2)+(Goal_Depth), 0)))
     holoModel(34, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(34, vec(Line_Thickness, Goal_Depth*2, Line_Height))
     holoMaterial(34, "debug/debugdrawflat")
     
-    # RED GOAL BOX RIGHT
+    # red goal box right
     holoPos(35, holoEntity(0):toWorld(vec((-Goal_Width), -(SizeX/2)+(Goal_Depth), 0)))
     holoModel(35, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(35, vec(Line_Thickness, Goal_Depth*2, Line_Height))
     holoMaterial(35, "debug/debugdrawflat")
     
-    # RED GOAL BOX MIDDLE
+    # red goal box middle
     holoPos(36, holoEntity(0):toWorld(vec(0, -(SizeX/2)+(Goal_Depth*2), 0)))
     holoModel(36, "models/hunter/blocks/cube8x8x8.mdl")
     holoScaleUnits(36, vec((Goal_Width*2)+Line_Thickness, Line_Thickness, Line_Height))
     holoMaterial(36, "debug/debugdrawflat")
     
-    # RED GOAL SCORE RING-COLOR
+    # red goal score ring-color
     holoPos(37, holoEntity(0):toWorld(vec(0, (SizeX/2)+Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(37, holoEntity(0):toWorld(ang(0, 0, 90)))
     holoScaleUnits(37, vec(200, 200, 20))
@@ -373,7 +372,7 @@ if (first()) {
     holoMaterial(37, "debug/debugdrawflat")
     holoModel(37, "hq_cylinder")
     
-    # RED GOAL SCORE WHITE-COLOR
+    # red goal score white-color
     holoPos(38, holoEntity(0):toWorld(vec(0, 2+(SizeX/2)+Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(38, holoEntity(0):toWorld(ang(0, 0, 90)))
     holoScaleUnits(38, vec(202, 202, 18))
@@ -381,7 +380,7 @@ if (first()) {
     #holoMaterial(38, "debug/debugdrawflat")
     holoModel(38, "hq_cylinder")
     
-    # RED GOAL SCORE BLACK-COLOR
+    # red goal score black-color
     holoPos(39, holoEntity(0):toWorld(vec(0, -1+(SizeX/2)+Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(39, holoEntity(0):toWorld(ang(0, 0, 90)))
     holoScaleUnits(39, vec(190, 190, 20))
@@ -389,7 +388,7 @@ if (first()) {
     holoMaterial(39, "debug/debugdrawflat")
     holoModel(39, "hq_cylinder")
     
-    # RED GOAL DIGIT 1
+    # red goal 1. digit
     holoPos(40, holoEntity(0):toWorld(vec(-38, -3+(SizeX/2)+Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(40, holoEntity(0):toWorld(ang(90, 0, 90)))
     holoScaleUnits(40, vec(95, 95, 20))
@@ -398,7 +397,7 @@ if (first()) {
     holoModel(40, "hq_cylinder")
     holoDisableShading(40, 1)
     
-    # RED GOAL DIGIT 2
+    # red goal 2. digit
     holoPos(41, holoEntity(0):toWorld(vec(38, -3+(SizeX/2)+Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(41, holoEntity(0):toWorld(ang(90, 0, 90)))
     holoScaleUnits(41, vec(95, 95, 20))
@@ -407,7 +406,7 @@ if (first()) {
     holoModel(41, "hq_cylinder")
     holoDisableShading(41, 1)
     
-    # BLUE GOAL SCORE RING-COLOR
+    # blue goal score ring-color
     holoPos(42, holoEntity(0):toWorld(vec(0, -(SizeX/2)-Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(42, holoEntity(0):toWorld(ang(0, 0, 90)))
     holoScaleUnits(42, vec(200, 200, 20))
@@ -415,7 +414,7 @@ if (first()) {
     holoMaterial(42, "debug/debugdrawflat")
     holoModel(42, "hq_cylinder")
     
-    # BLUE GOAL SCORE WHITE-COLOR
+    # blue goal score white-color
     holoPos(43, holoEntity(0):toWorld(vec(0, -2-(SizeX/2)-Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(43, holoEntity(0):toWorld(ang(0, 0, 90)))
     holoScaleUnits(43, vec(202, 202, 18))
@@ -423,7 +422,7 @@ if (first()) {
     #holoMaterial(43, "debug/debugdrawflat")
     holoModel(43, "hq_cylinder")
     
-    # BLUE GOAL SCORE BLACK-COLOR
+    # blue goal score black-color
     holoPos(44, holoEntity(0):toWorld(vec(0, 1-(SizeX/2)-Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(44, holoEntity(0):toWorld(ang(0, 0, 90)))
     holoScaleUnits(44, vec(190, 190, 20))
@@ -431,7 +430,7 @@ if (first()) {
     holoMaterial(44, "debug/debugdrawflat")
     holoModel(44, "hq_cylinder")
     
-    # BLUE GOAL DIGIT 1
+    # blue goal 1. digit
     holoPos(45, holoEntity(0):toWorld(vec(38, 3-(SizeX/2)-Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(45, holoEntity(0):toWorld(ang(90, 0, -90)))
     holoScaleUnits(45, vec(95, 95, 20))
@@ -440,7 +439,7 @@ if (first()) {
     holoModel(45, "hq_cylinder")
     holoDisableShading(45, 1)
     
-    # BLUE GOAL DIGIT 2
+    # blue goal 2. digit
     holoPos(46, holoEntity(0):toWorld(vec(-38, 3-(SizeX/2)-Goal_Depth, Goal_Height+ScoreBoard_Height)))
     holoAng(46, holoEntity(0):toWorld(ang(90, 0, -90)))
     holoScaleUnits(46, vec(95, 95, 20))
@@ -457,32 +456,32 @@ if (first()) {
                         "models/hunter/tubes/circle4x4d.mdl", "models/hunter/tubes/tube4x4x4d.mdl")
     Props_Pos = array(
     
-    # SIDE WALLS
+    # side walls
     holoEntity(0):toWorld(vec(Sides_Margin+(SizeY/2), 759, 200+Goal_Height-0)), 
     holoEntity(0):toWorld(vec(Sides_Margin+(SizeY/2), -759, 200+Goal_Height-0)), 
     holoEntity(0):toWorld(vec(-Sides_Margin-(SizeY/2), 759, 200+Goal_Height-0)), 
     holoEntity(0):toWorld(vec(-Sides_Margin-(SizeY/2), -759, 200+Goal_Height-0)), 
     
-    # GOAL FRONT WALLS RED
+    # goal front walls red
     holoEntity(0):toWorld(vec(0, Goal_Margins+(SizeX/2), 200+Goal_Height-0)), 
 
-    # GOAL FRONT WALLS BLUE
+    # goal front walls blue
     holoEntity(0):toWorld(vec(0, -Goal_Margins-(SizeX/2), 200+Goal_Height-0)), 
     
-    # GOAL QUARTER-CIRCLES RED
+    # goal quarter-circles red
     holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)+(Goal_Width/2))+(Line_Thickness/2), SizeX/2, -Goal_OffsetZ)), 
     holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)-(Goal_Width/2))+(Line_Thickness/2), SizeX/2, -Goal_OffsetZ)), 
     holoEntity(0):toWorld(vec(0, SizeX/2, -Goal_OffsetZ)), 
     
-    #GOAL QUARTER-CIRCLES BLUE
+    # goal quarter-circles blue
     holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)-(Goal_Width/2))-(Line_Thickness/2), -SizeX/2, -Goal_OffsetZ)), 
     holoEntity(0):toWorld(vec((SizeY/2)-((SizeY/2)+(Goal_Width/2))-(Line_Thickness/2), -SizeX/2, -Goal_OffsetZ)), 
     holoEntity(0):toWorld(vec(0, -SizeX/2, -Goal_OffsetZ))
     )
     Props_Ang = array(
-    ang(90, 0, 0), ang(90, 0, 0), ang(90, 0, 0), ang(90, 0, 0), 
-    ang(90, 90, 0), ang(90, 90, 0), ang(90, 180, 0), ang(90, 180, 0), 
-    ang(90, 180, 0), ang(90, 0, 0), ang(90, 0, 0), ang(90, 0, 0)
+        ang(90, 0, 0), ang(90, 0, 0), ang(90, 0, 0), ang(90, 0, 0), 
+        ang(90, 90, 0), ang(90, 90, 0), ang(90, 180, 0), ang(90, 180, 0), 
+        ang(90, 180, 0), ang(90, 0, 0), ang(90, 0, 0), ang(90, 0, 0)
     )
     
     holoPos(48, holoEntity(0):toWorld(vec(Sides_Margin+(SizeY/2), 759, 24)))
@@ -521,7 +520,7 @@ if (first()) {
     holoClipEnabled(52, 2, 1)
     holoClip(52, 1, holoEntity(0):toWorld(vec(Sides_Margin+(SizeY/2), -Goal_Margins-(SizeX/2), 24)), vec(-1, 0, 0), 1)
     holoClip(52, 2, holoEntity(0):toWorld(vec(-Sides_Margin-(SizeY/2), -Goal_Margins-(SizeX/2), 24)), vec(1, 0, 0), 1)
-    
+
     holoPos(53, holoEntity(0):toWorld(vec(0, -Goal_Margins-(SizeX/2), 24)))
     holoAng(53, ang(90, 90, 0))
     holoModel(53, "models/hunter/plates/plate1x32.mdl")
@@ -533,11 +532,11 @@ if (first()) {
     }
     
     if (propCanCreate() & PropMode==1 & PropIndex<=Props_Model:count()) {
-		TempProp = propSpawn(Props_Model[PropIndex, string], Props_Pos[PropIndex, vector], Props_Ang[PropIndex, angle], 1)
+        TempProp = propSpawn(Props_Model[PropIndex, string], Props_Pos[PropIndex, vector], Props_Ang[PropIndex, angle], 1)
         Props_Array:pushEntity(TempProp)
         TempProp:setAlpha(0)
         PropIndex++
-	}
+    }
     
 if (Red_Score<10) {
     holoMaterial(40, "models/cheeze/buttons2/0")
@@ -555,14 +554,14 @@ if (Blue_Score<10) {
     holoMaterial(46, "models/cheeze/buttons2/"+Blue_Score:toString()[2])
 }
 
-#EasterEgg ;]]
+# EasterEgg ;]]
 if (Red_Score>99 | Blue_Score>99) {
     
-    for(I=1, 60) {
+    for (I=1, 60) {
         holoPos(I, holoEntity(0):toWorld(vec(random(-1000, 1000), random(-1000, 1000), random(0, 300))))
         Props_Array[I, entity]:setAlpha(255)
         Props_Array[I, entity]:propFreeze(0)
-	}
+    }
     Red_Score=0
     Blue_Score=0
     hint("Easter Egg unlocked! Destroying field, goodbye and thanks for all the fish! :)", 30)
@@ -570,7 +569,7 @@ if (Red_Score>99 | Blue_Score>99) {
 
 
 if (LastSaid=="!setball" & round(LastSaidWhen)==round(curtime()) & !Ball) {
-    Ball=owner():aimEntity()
+    Ball = owner():aimEntity()
     holoPos(47, Ball:pos())
     holoAng(47, Ball:angles())
     holoModel(47, Ball:model())
@@ -588,37 +587,39 @@ if (Ball) {
     
     # RED GOAL
     if (Ball_Ranger:entity()==Props_Array[9, entity] & !Goal_Mode) {
-        Blue_Score+=1
-        Goal_Mode=1
-        Ball_Alpha=255
+        Blue_Score += 1
+        Goal_Mode = 1
+        Ball_Alpha = 255
         holoColor(47, Team_BlueColor)
         Ball:propFreeze(1)
         timer("resetball", 6000)
-	}
+    }
     
     # BLUE GOAL
     if (Ball_Ranger:entity()==Props_Array[12, entity] & !Goal_Mode) {
-        Red_Score+=1
-        Goal_Mode=1
-        Ball_Alpha=255
+        Red_Score += 1
+        Goal_Mode = 1
+        Ball_Alpha = 255
         holoColor(47, Team_RedColor)
         Ball:propFreeze(1)
         timer("resetball", 6000)
-	}
+    }
     
     
     if(Goal_Mode) {
         Ball:setAng(ang(sin(curtime()*120)*10, curtime()*100, sin(curtime()*120)*10))
-        if(Ball_Alpha>0){Ball_Alpha-=1.5}
+        if (Ball_Alpha>0) {
+            Ball_Alpha-=1.5
+        }
         holoAlpha(47, Ball_Alpha)
-	}
+    }
         
     if (clk("resetball")) {
-        Goal_Mode=0
+        Goal_Mode = 0
         Ball:setPos(holoEntity(0):toWorld(vec(0, 0, 1000)))
         Ball:propFreeze(0)
-        Ball_Alpha=0
-	}
+        Ball_Alpha = 0
+    }
     
 } else {
     LastSaid = owner():lastSaid() 
