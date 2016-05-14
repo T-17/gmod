@@ -41,9 +41,9 @@ if (first()) {
     holoAlpha(0, 0)
     holoAng(0, ang(0))
     for (I = 1, 53) {
-		holoCreate(I)
-		holoParent(I, holoEntity(0))
-	}
+        holoCreate(I)
+        holoParent(I, holoEntity(0))
+    }
     holoAlpha(47, 0)
     propSpawnUndo(0)
     PropIndex = 1 # must be 1
