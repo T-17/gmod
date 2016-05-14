@@ -3,12 +3,8 @@
 Requires the [powerful](https://github.com/its-suun/gmod/tree/master/starfall/lib) library to be installed.
 
 ### Commands
-  - `?team create <team-name>`
-  - `?team add <team-name> <player-name1> <player-name2> ...`
-  - `?team remove <team-name> <player-name1> <player-name2> ...`
   - `?fb <amount> <model> <force-multiplier>` , use `-` to use the default value for a parameter
 
-Only players in a team can touch the ball.
 I suggest using this football script with [Tek's Football Field](https://github.com/its-suun/gmod/blob/master/expression2/tekFootballField.txt).
 
 ## Controls

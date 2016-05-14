@@ -33,14 +33,6 @@ local clamp = math.clamp
 local random = math.random
 local IN_KEY = IN_KEY
 
-local function isfbplayer(ply)
-    for _, team in pairs(fbteams) do
-        for _, p in pairs(team) do
-            if ply == p then return true end
-        end
-    end
-end
-
 local white = "models/debug/debugwhite"
 local red = "phoenix_storms/pack2/redlight"
 local blue = "phoenix_storms/pack2/darkblue"
@@ -155,10 +147,6 @@ function Football:new(pos, model, mul)
         local ply
         if e and e:isValid() and e:isPlayer() then
             ply = e
-            if not isfbplayer(ply) then
-                self.e:setVelocity(data.OurOldVelocity)
-                return
-            end
         end
         local playedSound = false
         

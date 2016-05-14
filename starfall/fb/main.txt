@@ -36,13 +36,11 @@ SOFTWARE.
 
 --[[ Required files ]]--
 --@include lib/powerful.txt
---@include fb/team.txt
 --@include fb/chat.txt
 --@include fb/ent.txt
 
 pw = require "lib/powerful.txt"
 
-require "fb/team.txt"
 require "fb/chat.txt"
 require "fb/ent.txt"
 
@@ -65,19 +63,6 @@ hook.add("Command", "SpawnFootball", function(cmd, args)
     end)
 end)
 
-hook.add("Command", "Save", function(cmd, args)
-    if cmd ~= "session" then return end
-    local action = table.remove(args, 1)
-    local name = args[1] or "nil"
-    if action == "save" then
-        local data = von.serialize(fbteams)
-        globaltables.global[name:lower()] = data
-        print("Saved session")
-    elseif action == "load" then
-        fbteams = von.deserialize(globaltables.global[name:lower()])
-        print("Loaded session")
-    end
-end)    
 end
 
 -- vim: ft=lua
