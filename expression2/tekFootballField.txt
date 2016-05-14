@@ -625,3 +625,5 @@ if (Ball) {
     LastSaid = owner():lastSaid() 
     LastSaidWhen = owner():lastSaidWhen()
 }
+
+# vim: tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
