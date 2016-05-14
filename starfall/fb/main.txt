@@ -48,6 +48,13 @@ require "fb/ent.txt"
 if SERVER then
 local defaultModel = "models/props_phx/misc/soccerball.mdl"
 local footballs = {}
+local unspawnedFootballs = {}
+
+timer.create("SpawnFootballs", 1/prop.spawnRate(), 0, function()
+	if #unspawnedFootballs==0 then return end
+	local d = table.remove(unspawnedFootballs, 1)
+	footballs[#footballs + 1] = Football(unpack(d))
+end)
 
 hook.add("Command", "SpawnFootball", function(cmd, args)
     if cmd ~= "fb" then return end
@@ -56,11 +63,9 @@ hook.add("Command", "SpawnFootball", function(cmd, args)
     local mul =   tonumber((args[3]=="-" or (not args[3])) and 1 or args[3])
 
     local n = 1
-    timer.create("SpawnFootballs", 1/prop.spawnRate(), count, function()
-        if not prop.canSpawn() then return end
-        footballs[#footballs+1] = Football(chip():getPos() + Vector(0, 0, 50), model, mul)
-        n = n + 1
-    end)
+		for i = 1, count do
+        unspawnedFootballs[#unspawnedFootballs+1] = { chip():getPos() + Vector(0, 0, 50), model, mul }
+    end
 end)
 
 end
