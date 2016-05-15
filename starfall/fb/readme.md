@@ -4,7 +4,7 @@ Requires the [powerful](https://github.com/its-suun/gmod/tree/master/starfall/li
 
 ### Commands
   - `?fb`, spawns one football
-	- `?puck`, spawns a puck; same controls as football, but larger and you can't shoot in the air
+  - `?puck`, spawns a puck; same controls as football, but larger and you can't shoot in the air
   - `?ent <amount> <model> <force-multiplier>` , use `-` to use the default value for a parameter
 
 I suggest using this football script with [Tek's Football Field](https://github.com/its-suun/gmod/blob/master/expression2/tekFootballField.txt).
