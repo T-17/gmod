@@ -35,9 +35,9 @@ local IN_KEY = IN_KEY
 
 Football = pw.class()
 
-
-function Football:hitNormal(ply)
-    local config = self.config.normalShot
+function Football:doShot(ply, name)
+    local config = self.config[name]
+    if not config then return end
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
     if config.z then
@@ -46,100 +46,8 @@ function Football:hitNormal(ply)
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
-    return vel
+    self.e:setVelocity(vel)
 end
-
-function Football:hitRun(ply)
-    local config = self.config.runShot
-    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
-    if config.z then
-        vel.z = clamp(vel.z, config.z.min, config.z.max)
-    end
-    if config.trail then
-        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
-    end
-    return vel
-end
-
-
-function Football:hitStrong(ply)
-    local config = self.config.strongShot
-    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = ply:getAimVector() * config.aimed
-    if config.z then
-        vel.z = clamp(vel.z, config.z.min, config.z.max)
-    end
-    if config.trail then
-        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
-    end
-    return vel
-end
-
-function Football:hitSuper(ply)
-    local config = self.config.superShot
-    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
-    if config.z then
-        vel.z = clamp(vel.z, config.z.min, config.z.max)
-    end
-    if config.trail then
-        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
-    end
-    return vel
-end
-
-function Football:hitHead(ply)
-    local config = self.config.headShot
-    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
-    if config.z then
-        vel.z = clamp(vel.z, config.z.min, config.z.max)
-    end
-    if config.trail then
-        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
-    end
-    return vel
-end
-
-function Football:hitTall(ply)
-    local config = self.config.tallShot
-    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = ply:getAimVector() * config.aimed
-    if config.z then
-        vel.z = clamp(vel.z, config.z.min, config.z.max)
-    end
-    if config.trail then
-        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
-    end
-    return vel
-end    
-
-function Football:hitStop(ply)
-    local config = self.config.stopShot
-    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = vel:getNormalized() * config.normal
-    if config.z then
-        vel.z = clamp(vel.z, config.z.min, config.z.max)
-    end
-    if config.trail then
-        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
-    end
-    return vel
-end    
-
-function Football:hitAim(ply)
-    local config = self.config.aimedShot
-    local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = ply:getAimVector() * config.aimed
-    if config.z then
-        vel.z = clamp(vel.z, config.z.min, config.z.max)
-    end
-    if config.trail then
-        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
-    end
-    return vel
-end    
 
 function Football:isHead(ply)
     local lPos = ply:worldToLocal(self.e:getPos())
@@ -179,34 +87,29 @@ function Football:new(pos, config)
         
         if ply then
             self.e:removeTrails()
-            local setVel
             if ply:keyDown(IN_KEY.RELOAD) then
-                setVel = self:hitStop(ply)
+                self:doShot(ply, "stopShot")
             elseif self:isHead(ply) then
-                setVel = self:hitHead(ply) 
+                self:doShot(ply, "headShot")
             elseif ply:keyDown(IN_KEY.USE) then
                 local onGround = trace(ply:getPos(),ply:getPos()-Vector(0,0,10)).Hit
-    
                 if onGround then
-                    setVel = self:hitStrong(ply)
+                    self:doShot(ply, "strongShot")
                 else
-                    setVel = self:hitSuper(ply)
+                    self:doShot(ply, "superShot")
                 end
                 self.e:setMass(120)
                 self.isShooting = true
             elseif ply:keyDown(IN_KEY.WALK) then
-                setVel = self:hitTall(ply)
+                self:doShot(ply, "tallShot")
             elseif ply:keyDown(IN_KEY.DUCK) then
-                self.e:removeTrails()
-                setVel = self:hitAim(ply)
+                self:doShot(ply, "aimedShot")
                 self.isShooting = true
             elseif ply:keyDown(IN_KEY.RUN) then
-                setVel = self:hitRun(ply)
+                self:doShot(ply, "runShot")
             else
-                setVel = self:hitNormal(ply)
+                self:doShot(ply, "normalShot")
             end
-            self.e:setVelocity(setVel)
-            
             self.e:emitSound(self.config.sounds[random(1, #self.config.sounds)], 75, 100)
         end    
     end )
