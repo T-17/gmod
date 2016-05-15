@@ -155,7 +155,7 @@ function Football:new(pos, model, mul)
             self.e:setMass(80)
             timer.create('RemoveTrail', 1, 1, function()
                 self.e:removeTrails()
-						end)
+            end)
             return
         end
         
@@ -199,4 +199,4 @@ function Football:new(pos, model, mul)
     chip():emitSound("coach/coach_go_here.wav")
 end
 
--- vim: ft=lua
+-- vim: ft=lua tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
