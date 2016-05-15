@@ -122,8 +122,88 @@ configs.football = {
         [2] = blue,
         [3] = red,
     },
+    }
+
 }
 
+configs.puck = {
+    model = "models/Mechanics/gears2/vert_36t1.mdl",
+    normalShot = {
+        normal = 200,
+        aimed  = 300,
+        z      = {
+            min = 0,
+            max = 0,
+        },
+    },
+    runShot = {
+        normal = 400,
+        aimed  = 300,
+        z      = {
+            min = 0,
+            max = 0,
+        },
+   },
+    strongShot = {
+        normal =  50,
+        aimed  =  1250,
+        z      = {
+            min = 0,
+            max = 0,
+        },
+        trail  = {
+            mat = "trails/smoke",
+            color = Color(128, 128, 255),
+        },
+    },
+    superShot = {
+        normal = 300,
+        aimed  = 2000,
+        z      = {
+            min = 0,
+            max = 0,
+        },
+        trail  = {
+            mat = "trails/smoke",
+            color = Color(128, 255, 128),
+        },
+    },
+    tallShot = {
+        normal = 0,
+        aimed  = 350,
+        z      = {
+            min = 0,
+            max = 0,
+        },
+    },
+    aimedShot = {
+        aimed = 2000,
+        z      = {
+            min = 0,
+            max = 0,
+        },
+        trail  = {
+            mat = "trails/smoke",
+            color = Color(255, 128, 128),
+        },
+    },
+    headShot = {
+        normal = 500,
+        aimed  = 250,
+        z      = {
+            min = 0,
+            max = 0,
+        },
+    },
+
+    stopShot = {
+        normal = 50,
+        aimed  = 0,
+        z      = {
+            min = 0,
+            max = 0,
+        },
+    },
 }
 
 local function mulTable(tbl, mul)

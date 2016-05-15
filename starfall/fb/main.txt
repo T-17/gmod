@@ -63,6 +63,12 @@ hook.add("Command", "Football", function(cmd, args)
     unspawnedFootballs[#unspawnedFootballs + 1] = { chip():getPos() + Vector(0, 0, 50), configs.football }
 end)
 
+hook.add("Command", "Puck", function(cmd, args)
+    if cmd ~= "puck" then return end
+    unspawnedFootballs[#unspawnedFootballs + 1] = { chip():getPos() + Vector(0, 0, 50), configs.puck }
+end)
+
+
 hook.add("Command", "SpawnFootball", function(cmd, args)
     if cmd ~= "ent" then return end
     local count = tonumber((args[1]=="-" or (not args[1])) and 1 or args[1])
