@@ -30,6 +30,11 @@ SOFTWARE.
 
 configs = {}
 
+local white = "models/debug/debugwhite"
+local red = "phoenix_storms/pack2/redlight"
+local blue = "phoenix_storms/pack2/darkblue"
+local black = "phoenix_storms/black_chrome"
+
 configs.football = {
     model = "models/props_phx/misc/soccerball.mdl",
     normalShot = {
@@ -79,6 +84,33 @@ configs.football = {
             max = 10,
         },
     },
+    layouts = {
+    {
+        [0] = black,
+        [1] = white,
+        [2] = black,
+        [3] = white,
+    },
+    {
+        [0] = black,
+        [1] = white,
+        [2] = red,
+        [3] = black,
+    },
+    {
+        [0] = black,
+        [1] = white,
+        [2] = blue,
+        [3] = white,
+    },
+    {
+        [0] = black,
+        [1] = white,
+        [2] = blue,
+        [3] = red,
+    },
+}
+
 }
 
 
