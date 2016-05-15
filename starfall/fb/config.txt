@@ -37,6 +37,11 @@ local black = "phoenix_storms/black_chrome"
 
 configs.football = {
     model = "models/props_phx/misc/soccerball.mdl",
+    sounds = {
+        "physics/rubber/rubber_tire_impact_hard1.wav",
+        "physics/rubber/rubber_tire_impact_hard2.wav",
+        "physics/rubber/rubber_tire_impact_hard3.wav",
+    },
     normalShot = {
         normal = 200,
         aimed  = 300,
@@ -129,6 +134,11 @@ configs.football = {
 configs.puck = {
     model = "models/Mechanics/gears2/vert_36t1.mdl",
     color = Color(50, 50, 50, 255),
+    sounds = {
+        "physics/metal/metal_canister/impact_soft1.wav",
+        "physics/metal/metal_canister/impact_soft2.wav",
+        "physics/metal/metal_canister/impact_soft3.wav",
+    },
     normalShot = {
         normal = 200,
         aimed  = 300,
