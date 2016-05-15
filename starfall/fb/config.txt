@@ -48,14 +48,23 @@ configs.football = {
     runShot = {
         normal = 400,
         aimed  = 300,
-    },
+   },
     strongShot = {
         normal =  50,
         aimed  =  1250,
+        trail  = {
+            mat = "trails/smoke",
+            color = Color(128, 128, 255),
+        },
     },
     superShot = {
         normal = 300,
         aimed  = 2000,
+        trail  = {
+            mat = "trails/smoke",
+            color = Color(128, 255, 128),
+        },
+
     },
     tallShot = {
         normal = 0,
@@ -70,6 +79,10 @@ configs.football = {
         z     = {
             min = 0,
             max = 100,
+        },
+        trail  = {
+            mat = "trails/smoke",
+            color = Color(255, 128, 128),
         },
     },
     headShot = {

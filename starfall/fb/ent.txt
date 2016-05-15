@@ -41,6 +41,9 @@ function Football:hitNormal(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
     vel.z = clamp(vel.z, 0, 250)
+    if config.trail then
+        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
+    end
     return vel
 end
 
@@ -49,6 +52,9 @@ function Football:hitRun(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
     vel.z = clamp(vel.z, 0, 250)
+    if config.trail then
+        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
+    end
     return vel
 end
 
@@ -57,7 +63,9 @@ function Football:hitStrong(ply)
     local config = self.config.strongShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = ply:getAimVector() * config.aimed
-    self.e:setTrails(10, 1, 5, 'trails/smoke', Color(128, 128, 255))
+    if config.trail then
+        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
+    end
     return vel
 end
 
@@ -65,7 +73,9 @@ function Football:hitSuper(ply)
     local config = self.config.superShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
-    self.e:setTrails(10, 1, 5, 'trails/smoke', Color(128, 255, 128))
+    if config.trail then
+        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
+    end
     return vel
 end
 
@@ -73,6 +83,9 @@ function Football:hitHead(ply)
     local config = self.config.headShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
+    if config.trail then
+        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
+    end
     return vel
 end
 
@@ -81,6 +94,9 @@ function Football:hitTall(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = ply:getAimVector() * config.aimed
     vel.z = clamp(vel.z, config.z.min, config.z.max)
+    if config.trail then
+        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
+    end
     return vel
 end    
 
@@ -89,6 +105,9 @@ function Football:hitStop(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal
     vel.z = clamp(vel.z, config.z.min, config.z.max)
+    if config.trail then
+        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
+    end
     return vel
 end    
 
@@ -97,7 +116,9 @@ function Football:hitAim(ply)
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = ply:getAimVector() * config.aimed
     vel.z = clamp(vel.z, config.z.min, config.z.max)
-    self.e:setTrails(10, 1, 5, 'trails/smoke', Color(255, 128, 128))
+    if config.trail then
+        self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
+    end
     return vel
 end    
 
@@ -129,21 +150,20 @@ function Football:new(pos, config)
         if self.isShooting then
             self.isShooting = false
             self.e:setMass(80)
-            timer.create('RemoveTrail', 1, 1, function()
+            timer.simple(1, function()
                 self.e:removeTrails()
             end)
             return
         end
         
         if ply then
+            self.e:removeTrails()
             local setVel
             if ply:keyDown(IN_KEY.RELOAD) then
                 setVel = self:hitStop(ply)
             elseif self:isHead(ply) then
                 setVel = self:hitHead(ply) 
             elseif ply:keyDown(IN_KEY.USE) then
-                self.e:removeTrails()
-                timer.remove('RemoveTrail')                
                 local onGround = trace(ply:getPos(),ply:getPos()-Vector(0,0,10)).Hit
     
                 local i = 0
@@ -158,7 +178,6 @@ function Football:new(pos, config)
                 setVel = self:hitTall(ply)
             elseif ply:keyDown(IN_KEY.DUCK) then
                 self.e:removeTrails()
-                timer.remove('RemoveTrail')
                 setVel = self:hitAim(ply)
                 self.isShooting = true
             elseif ply:keyDown(IN_KEY.RUN) then
