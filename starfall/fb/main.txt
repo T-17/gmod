@@ -58,15 +58,23 @@ timer.create("SpawnFootballs", 1/prop.spawnRate(), 0, function()
     footballs[#footballs + 1] = Football(unpack(d))
 end)
 
-hook.add("Command", "SpawnFootball", function(cmd, args)
+hook.add("Command", "Football", function(cmd, args)
     if cmd ~= "fb" then return end
+    unspawnedFootballs[#unspawnedFootballs + 1] = { chip():getPos() + Vector(0, 0, 50), configs.football }
+end)
+
+hook.add("Command", "SpawnFootball", function(cmd, args)
+    if cmd ~= "ent" then return end
     local count = tonumber((args[1]=="-" or (not args[1])) and 1 or args[1])
     local model = (args[2]=="-" or (not args[2])) and defaultModel or args[2]
     local mul =   tonumber((args[3]=="-" or (not args[3])) and 1 or args[3])
 
+    local config = createConfig("football")
+    config.model = model
+
     local n = 1
     for i = 1, count do
-        unspawnedFootballs[#unspawnedFootballs+1] = { chip():getPos() + Vector(0, 0, 50), model, mul, configs.football }
+        unspawnedFootballs[#unspawnedFootballs+1] = { chip():getPos() + Vector(0, 0, 50), config }
     end
 end)
 

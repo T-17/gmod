@@ -70,7 +70,7 @@ Football = pw.class()
 function Football:hitNormal(ply)
     local config = self.config.normalShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = (vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed) * self.mul
+    vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
     vel.z = clamp(vel.z, 0, 250)
     return vel
 end
@@ -78,7 +78,7 @@ end
 function Football:hitRun(ply)
     local config = self.config.runShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = (vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed) * self.mul
+    vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
     vel.z = clamp(vel.z, 0, 250)
     return vel
 end
@@ -87,7 +87,7 @@ end
 function Football:hitStrong(ply)
     local config = self.config.strongShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = ply:getAimVector() * config.aimed * self.mul
+    vel = ply:getAimVector() * config.aimed
     self.e:setTrails(10, 1, 5, 'trails/smoke', Color(128, 128, 255))
     return vel
 end
@@ -95,7 +95,7 @@ end
 function Football:hitSuper(ply)
     local config = self.config.superShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = (vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed) * self.mul
+    vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
     self.e:setTrails(10, 1, 5, 'trails/smoke', Color(128, 255, 128))
     return vel
 end
@@ -103,15 +103,15 @@ end
 function Football:hitHead(ply)
     local config = self.config.headShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = (vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed) * self.mul
+    vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
     return vel
 end
 
 function Football:hitTall(ply)
     local config = self.config.tallShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = ply:getAimVector() * config.aimed * self.mul
-    vel.z = clamp(vel.z, config.z.min, config.z.max) * self.mul
+    vel = ply:getAimVector() * config.aimed
+    vel.z = clamp(vel.z, config.z.min, config.z.max)
     return vel
 end    
 
@@ -126,7 +126,7 @@ end
 function Football:hitAim(ply)
     local config = self.config.aimedShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = ply:getAimVector() * config.aimed * self.mul
+    vel = ply:getAimVector() * config.aimed
     vel.z = clamp(vel.z, config.z.min, config.z.max)
     self.e:setTrails(10, 1, 5, 'trails/smoke', Color(255, 128, 128))
     return vel
@@ -138,15 +138,13 @@ function Football:isHead(ply)
 end
 
 
-function Football:new(pos, model, mul, config)
+function Football:new(pos, config)
     self.config = config
-    self.model = model
-    self.mul = mul
     
-    self.e = prop.create(pos, Angle(0,0,0), self.model, false)
+    self.e = prop.create(pos, Angle(0,0,0), self.config.model, false)
     self.e:setFrozen(false)
     
-    if self.model == "models/props_phx/misc/soccerball.mdl" then
+    if self.config.model == "models/props_phx/misc/soccerball.mdl" then
         for k, v in pairs(layouts[math.random(1, #layouts)]) do
             self.e:setSubMaterial(k, v)
         end
