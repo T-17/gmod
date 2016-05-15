@@ -151,6 +151,9 @@ function Football:new(pos, config)
     self.config = config
     
     self.e = prop.create(pos, Angle(0,0,0), self.config.model, false)
+    if self.config.color then
+        self.e:setColor(self.config.color)
+    end
     self.e:setFrozen(false)
     
     if self.config.layouts then
