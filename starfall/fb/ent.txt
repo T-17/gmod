@@ -33,8 +33,6 @@ local clamp = math.clamp
 local random = math.random
 local IN_KEY = IN_KEY
 
-local isShooting = false
-
 Football = pw.class()
 
 
