@@ -28,48 +28,65 @@ SOFTWARE.
 -- |  _| (_) | (_) | |_| |_) | (_| | | |
 -- |_|  \___/ \___/ \__|_.__/ \__,_|_|_|
 
---@name Football
---@author suun
---@model models/props_c17/consolebox01a.mdl
---@shared
+configs = {}
+
+configs.football = {
+    model = "models/props_phx/misc/soccerball.mdl",
+    normalShot = {
+        normal = 200,
+        aimed  = 300,
+        z      = {
+            min = 0,
+            max = 250,
+        },
+    },
+    runShot = {
+        normal = 400,
+        aimed  = 300,
+    },
+    strongShot = {
+        normal =  50,
+        aimed  =  1250,
+    },
+    superShot = {
+        normal = 300,
+        aimed  = 2000,
+    },
+    tallShot = {
+        normal = 0,
+        aimed  = 350,
+        z      = {
+            min = 500,
+            max = 500,
+        },
+    },
+    aimedShot = {
+        aimed = 2000,
+        z     = {
+            min = 0,
+            max = 100,
+        },
+    },
+    headShot = {
+        normal = 500,
+        aimed  = 250,
+    },
+    stopShot = {
+        normal = 50,
+        aimed  = 0,
+        z      = {
+            min = 0,
+            max = 10,
+        },
+    },
+}
 
 
---[[ Required files ]]--
---@include lib/powerful.txt
---@include fb/config.txt
---@include fb/chat.txt
---@include fb/ent.txt
-
-pw = require "lib/powerful.txt"
-
-require "fb/config.txt"
-require "fb/chat.txt"
-require "fb/ent.txt"
-
-
-if SERVER then
-local defaultModel = "models/props_phx/misc/soccerball.mdl"
-local footballs = {}
-local unspawnedFootballs = {}
-
-timer.create("SpawnFootballs", 1/prop.spawnRate(), 0, function()
-    if #unspawnedFootballs==0 then return end
-    local d = table.remove(unspawnedFootballs, 1)
-    footballs[#footballs + 1] = Football(unpack(d))
-end)
-
-hook.add("Command", "SpawnFootball", function(cmd, args)
-    if cmd ~= "fb" then return end
-    local count = tonumber((args[1]=="-" or (not args[1])) and 1 or args[1])
-    local model = (args[2]=="-" or (not args[2])) and defaultModel or args[2]
-    local mul =   tonumber((args[3]=="-" or (not args[3])) and 1 or args[3])
-
-    local n = 1
-    for i = 1, count do
-        unspawnedFootballs[#unspawnedFootballs+1] = { chip():getPos() + Vector(0, 0, 50), model, mul, configs.football }
-    end
-end)
-
+function createConfig(name, mul)
+    local t = table.copy(configs[name])
+    -- TODO: Apply multiplier
+    return t
 end
+
 
 -- vim: ft=lua tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
