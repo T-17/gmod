@@ -40,7 +40,9 @@ function Football:hitNormal(ply)
     local config = self.config.normalShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
-    vel.z = clamp(vel.z, 0, 250)
+    if config.z then
+        vel.z = clamp(vel.z, config.z.min, config.z.max)
+    end
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
@@ -51,7 +53,9 @@ function Football:hitRun(ply)
     local config = self.config.runShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
-    vel.z = clamp(vel.z, 0, 250)
+    if config.z then
+        vel.z = clamp(vel.z, config.z.min, config.z.max)
+    end
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
@@ -63,6 +67,9 @@ function Football:hitStrong(ply)
     local config = self.config.strongShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = ply:getAimVector() * config.aimed
+    if config.z then
+        vel.z = clamp(vel.z, config.z.min, config.z.max)
+    end
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
@@ -73,6 +80,9 @@ function Football:hitSuper(ply)
     local config = self.config.superShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
+    if config.z then
+        vel.z = clamp(vel.z, config.z.min, config.z.max)
+    end
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
@@ -83,6 +93,9 @@ function Football:hitHead(ply)
     local config = self.config.headShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
+    if config.z then
+        vel.z = clamp(vel.z, config.z.min, config.z.max)
+    end
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
@@ -93,7 +106,9 @@ function Football:hitTall(ply)
     local config = self.config.tallShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = ply:getAimVector() * config.aimed
-    vel.z = clamp(vel.z, config.z.min, config.z.max)
+    if config.z then
+        vel.z = clamp(vel.z, config.z.min, config.z.max)
+    end
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
@@ -104,7 +119,9 @@ function Football:hitStop(ply)
     local config = self.config.stopShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = vel:getNormalized() * config.normal
-    vel.z = clamp(vel.z, config.z.min, config.z.max)
+    if config.z then
+        vel.z = clamp(vel.z, config.z.min, config.z.max)
+    end
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
@@ -115,7 +132,9 @@ function Football:hitAim(ply)
     local config = self.config.aimedShot
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
     vel = ply:getAimVector() * config.aimed
-    vel.z = clamp(vel.z, config.z.min, config.z.max)
+    if config.z then
+        vel.z = clamp(vel.z, config.z.min, config.z.max)
+    end
     if config.trail then
         self.e:setTrails(10, 1, 5, config.trail.mat, config.trail.color)
     end
