@@ -39,7 +39,13 @@ function Football:doShot(ply, name)
     local config = self.config[name]
     if not config then return end
     local vel = self.e:getPos() - (ply:getPos()+Vector(0,0,5))
-    vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
+    if config.normal and config.aimed then
+        vel = vel:getNormalized() * config.normal + ply:getAimVector() * config.aimed
+    elseif config.normal then
+        vel = vel:getNormalized() * config.normal
+    elseif config.aimed then
+        vel = ply:getAimVector() * config.aimed
+    end
     if config.z then
         vel.z = clamp(vel.z, config.z.min, config.z.max)
     end
