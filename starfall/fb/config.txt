@@ -126,10 +126,19 @@ configs.football = {
 
 }
 
+local function mulTable(tbl, mul)
+    for k, v in pairs(tbl) do
+        if type(v) == "number" then
+            tbl[k] = v * mul
+        elseif type(v) == "table" then
+            mulTable(v, mul)
+        end
+    end
+end
 
 function createConfig(name, mul)
     local t = table.copy(configs[name])
-    -- TODO: Apply multiplier
+    mulTable(t, mul)
     return t
 end
 
