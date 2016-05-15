@@ -78,7 +78,6 @@ function Football:new(pos, config)
 
         if self.isShooting then
             self.isShooting = false
-            self.e:setMass(80)
             timer.simple(1, function()
                 self.e:removeTrails()
             end)
@@ -98,7 +97,6 @@ function Football:new(pos, config)
                 else
                     self:doShot(ply, "superShot")
                 end
-                self.e:setMass(120)
                 self.isShooting = true
             elseif ply:keyDown(IN_KEY.WALK) then
                 self:doShot(ply, "tallShot")
