@@ -167,8 +167,7 @@ function Football:new(pos, config)
         if e and e:isValid() and e:isPlayer() then
             ply = e
         end
-        local playedSound = false
-        
+
         if self.isShooting then
             self.isShooting = false
             self.e:setMass(80)
@@ -188,7 +187,6 @@ function Football:new(pos, config)
             elseif ply:keyDown(IN_KEY.USE) then
                 local onGround = trace(ply:getPos(),ply:getPos()-Vector(0,0,10)).Hit
     
-                local i = 0
                 if onGround then
                     setVel = self:hitStrong(ply)
                 else
