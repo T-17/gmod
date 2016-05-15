@@ -76,13 +76,9 @@ function Football:new(pos, config)
             ply = e
         end
 
-        if self.isShooting then
-            self.isShooting = false
-            timer.simple(1, function()
-                self.e:removeTrails()
-            end)
-            return
-        end
+        timer.simple(1, function()
+            self.e:removeTrails()
+        end)
         
         if ply then
             self.e:removeTrails()
