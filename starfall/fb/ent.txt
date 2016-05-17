@@ -82,9 +82,11 @@ function Football:new(pos, config)
             ply = e
         end
 
-        timer.simple(1, function()
-            self.e:removeTrails()
-        end)
+        if timer.getTimersLeft >= 1 then
+            timer.simple(1, function()
+                self.e:removeTrails()
+            end)
+        end
         
         if ply then
             self.e:removeTrails()
