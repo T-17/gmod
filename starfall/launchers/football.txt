@@ -1,0 +1,121 @@
+--[[
+MIT License
+
+Copyright (c) 2016 suun
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+--]]
+
+--  _____           _   _           _ _ 
+-- |  ___|__   ___ | |_| |__   __ _| | |
+-- | |_ / _ \ / _ \| __| '_ \ / _` | | |
+-- |  _| (_) | (_) | |_| |_) | (_| | | |
+-- |_|  \___/ \___/ \__|_.__/ \__,_|_|_|
+
+--@name Football Launcher
+--@author suun
+--@model models/props_c17/consolebox01a.mdl
+--@shared
+
+if SERVER then
+
+local files = {}
+hook.add("net", "footballLauncher", function(name, len, ply)
+    if ply ~= owner() then return end
+    if name == "save" then
+        local path = net.readString()
+        local content = net.readString()
+        files[path] = loadstring(content)
+    elseif name == "run" then
+        require = function(path)
+            return files[path]()
+        end
+        files["fb/main.txt"]()
+    end
+end)
+
+else
+
+if player() ~= owner() then return end
+
+file.createDir("lib")
+file.createDir("fb")
+
+local file = file
+
+local files = {
+    "lib/powerful.txt",
+    "fb/config.txt",
+    "fb/chat.txt",
+    "fb/ent.txt",
+    "fb/main.txt",
+}
+local currentFile = 0
+
+local function downloadNext()
+    currentFile = currentFile + 1
+    if currentFile > #files then
+        print("Finished downloading!")
+        net.start("run") net.send()
+        return
+    end
+    http.get("https://raw.githubusercontent.com/its-suun/gmod/master/starfall/" .. files[currentFile], function(body)
+        print("Downloaded " .. files[currentFile])
+        file.write(files[currentFile], body)
+        net.start("save")
+        net.writeString(files[currentFile])
+        net.writeString(body)
+        net.send()
+        timer.simple(3, function()
+            downloadNext()
+        end)
+    end, error)
+end
+
+local installed = true
+for k, v in pairs(files) do
+    if not file.exists(v) then
+        installed = false
+        break
+    end
+end
+
+if not installed then
+    print("Downloading football script!")
+    downloadNext()
+else
+    print("Found installed football script!")
+    print("Sending files to server...")
+    timer.create("sendFiles", 1, #files, function()
+        currentFile = currentFile + 1
+        net.start("save")
+        net.writeString(files[currentFile])
+        net.writeString(file.read(files[currentFile]))
+        net.send()
+        
+        if currentFile == #files then -- Last file
+            net.start("run") net.send()
+            print("Done")
+        end
+    end)
+end
+
+end
+
+-- vim: ft=lua tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
