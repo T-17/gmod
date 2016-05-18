@@ -50,8 +50,7 @@ if SERVER then
 	end)
 else
 	if player() ~= owner() then return end
-	pw.net.start("Msg")
-	net.send()
+	pw.net.msg("Msg")
 end
 ```
 
