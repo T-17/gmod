@@ -1,10 +1,11 @@
-![](http://i.imgur.com/LsfPxQv.png)
+![](http://i.imgur.com/4dCCfNF.png)
 
 Powerful is a multi-functional library for starfall. It offers:
-- Object Oriented Programming (Multiple Inheritance)
-- Network system with less traffic
+- [Object Oriented Programming](https://github.com/its-suun/gmod/wiki/Powerful-OOP)
+- [Network system with less traffic](https://github.com/its-suun/gmod/wiki/Powerful-Networking)
 - Instance-global variables
 - Caching for wire inputs
+- [Utility functions](https://github.com/its-suun/gmod/wiki/Powerful-Utility)
 
 
 
@@ -50,8 +51,7 @@ if SERVER then
 	end)
 else
 	if player() ~= owner() then return end
-	pw.net.start("Msg")
-	net.send()
+	pw.net.msg("Msg")
 end
 ```
 
