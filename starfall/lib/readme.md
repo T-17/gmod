@@ -1,4 +1,4 @@
-![](http://i.imgur.com/LsfPxQv.png)
+![](http://i.imgur.com/4dCCfNF.png)
 
 Powerful is a multi-functional library for starfall. It offers:
 - Object Oriented Programming (Multiple Inheritance)
