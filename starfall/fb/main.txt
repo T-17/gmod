@@ -31,7 +31,7 @@ SOFTWARE.
 --@name Football
 --@author suun
 --@model models/props_c17/consolebox01a.mdl
---@shared
+--@server
 
 
 --[[ Required files ]]--
@@ -47,7 +47,6 @@ require "fb/chat.txt"
 require "fb/ent.txt"
 
 
-if SERVER then
 local defaultModel = "models/props_phx/misc/soccerball.mdl"
 local footballs = {}
 local unspawnedFootballs = {}
@@ -83,7 +82,5 @@ hook.add("Command", "SpawnFootball", function(cmd, args)
         unspawnedFootballs[#unspawnedFootballs+1] = { chip():getPos() + Vector(0, 0, 50), config }
     end
 end)
-
-end
 
 -- vim: ft=lua tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
