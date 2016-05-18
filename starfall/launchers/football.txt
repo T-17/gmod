@@ -36,17 +36,28 @@ SOFTWARE.
 if SERVER then
 
 local files = {}
+require = function(path)
+    local ret
+    try(function()
+        ret = files[path]()
+    end, function(e)
+        print(path .. ": " .. e)
+        error()
+    end)
+    return ret
+end
+
 hook.add("net", "footballLauncher", function(name, len, ply)
     if ply ~= owner() then return end
     if name == "save" then
         local path = net.readString()
         local content = net.readString()
         files[path] = loadstring(content)
-    elseif name == "run" then
-        require = function(path)
-            return files[path]()
+        if type(files[path]) == "string" then
+            error(path .. ":" .. files[path])
         end
-        files["fb/main.txt"]()
+    elseif name == "run" then
+        require("fb/main.txt")
     end
 end)
 
@@ -71,7 +82,7 @@ local currentFile = 0
 local function downloadNext()
     currentFile = currentFile + 1
     if currentFile > #files then
-        print("Finished downloading!")
+        print("Finished downloading! Running...")
         net.start("run") net.send()
         return
     end
@@ -111,7 +122,7 @@ else
         
         if currentFile == #files then -- Last file
             net.start("run") net.send()
-            print("Done")
+            print("Done! Running...")
         end
     end)
 end
