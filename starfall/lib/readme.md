@@ -40,17 +40,18 @@ me:damage(42)
 --@include lib/powerful.txt
 local pw = require("lib/powerful.txt")
 
+pw.net.register {
+	"Msg"
+}
+
 if SERVER then
-    pw.net.register("Msg")
-    pw.net.onMessage("Msg", function()
-      print("Arrived")
-    end)
+	pw.net.onMessage("Msg", function()
+		print("Arrived")
+	end)
 else
-    if player() ~= owner() then return end
-    timer.simple(1, function()
-        pw.net.start("Msg")
-        net.send()
-    end)
+	if player() ~= owner() then return end
+	pw.net.start("Msg")
+	net.send()
 end
 ```
 
@@ -60,12 +61,10 @@ end
 local pw = require("lib/powerful.txt")
 
 if SERVER then
-    timer.simple(2, function()
-        pw.globals.a = 1
-    end)
+	pw.globals.a = 1
 else
-    timer.simple(4, function()
-        print(pw.globals.a) -- 1
-    end)
+	timer.simple(1, function()
+		print(pw.globals.a) -- 1
+	end)
 end
 ```
