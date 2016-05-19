@@ -403,6 +403,17 @@ elseif CLIENT then
 	end
 end
 
+do
+	local format = string.format
+	-- returns formatted float; strips off extra 0's and .'s
+	function pw.niceFloat(n)
+		n = string.format("%f", n)
+		n = n:TrimRight("0")
+		n = n:TrimRight(".")
+
+		return n
+	end
+end
 
 -- Client info on server:
 -- pw.clientLoaded on server
