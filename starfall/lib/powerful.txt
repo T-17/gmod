@@ -415,6 +415,16 @@ do
 	end
 end
 
+do
+	local clock = os.clock
+	
+	function pw.measure(func)
+		local t = clock()
+		func()
+		return clock() - t
+	end
+end
+
 -- Client info on server:
 -- pw.clientLoaded on server
 -- "ClientLoaded" hook gets called on server
