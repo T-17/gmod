@@ -87,9 +87,10 @@ do
 	local counter = 1
 
 	function pw.hook(name, callback)
-		hook.add(name, "Anonymous Hook: " .. counter, function()
-			callback()
-			hook.remove(name, "Anonymous Hook: " .. counter)
+		local n = counter
+		hook.add(name, "Anonymous Hook: " .. n, function(...)
+			callback(...)
+			hook.remove(name, "Anonymous Hook: " .. n)
 		end)
 		counter = counter + 1
 	end
