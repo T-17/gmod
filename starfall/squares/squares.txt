@@ -1,0 +1,772 @@
+--@name Squares
+--@author suun
+--@shared
+-- original game: http://gameaboutsquares.com
+
+
+local middleclass = {
+  _VERSION     = 'middleclass v4.1.0',
+  _DESCRIPTION = 'Object Orientation for Lua',
+  _URL         = 'https://github.com/kikito/middleclass',
+  _LICENSE     = [[
+    MIT LICENSE
+    Copyright (c) 2011 Enrique García Cota
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ]]
+}
+
+local function _createIndexWrapper(aClass, f)
+  if f == nil then
+    return aClass.__instanceDict
+  else
+    return function(self, name)
+      local value = aClass.__instanceDict[name]
+
+      if value ~= nil then
+        return value
+      elseif type(f) == "function" then
+        return (f(self, name))
+      else
+        return f[name]
+      end
+    end
+  end
+end
+
+local function _propagateInstanceMethod(aClass, name, f)
+  f = name == "__index" and _createIndexWrapper(aClass, f) or f
+  aClass.__instanceDict[name] = f
+
+  for subclass in pairs(aClass.subclasses) do
+    if rawget(subclass.__declaredMethods, name) == nil then
+      _propagateInstanceMethod(subclass, name, f)
+    end
+  end
+end
+
+local function _declareInstanceMethod(aClass, name, f)
+  aClass.__declaredMethods[name] = f
+
+  if f == nil and aClass.super then
+    f = aClass.super.__instanceDict[name]
+  end
+
+  _propagateInstanceMethod(aClass, name, f)
+end
+
+local function _tostring(self) return "class " .. self.name end
+local function _call(self, ...) return self:new(...) end
+
+local function _createClass(name, super)
+  local dict = {}
+  dict.__index = dict
+
+  local aClass = { name = name, super = super, static = {},
+                   __instanceDict = dict, __declaredMethods = {},
+                   subclasses = setmetatable({}, {__mode='k'})  }
+
+  if super then
+    setmetatable(aClass.static, { __index = function(_,k) return rawget(dict,k) or super.static[k] end })
+  else
+    setmetatable(aClass.static, { __index = function(_,k) return rawget(dict,k) end })
+  end
+
+  setmetatable(aClass, { __index = aClass.static, __tostring = _tostring,
+                         __call = _call, __newindex = _declareInstanceMethod })
+
+  return aClass
+end
+
+local function _includeMixin(aClass, mixin)
+  assert(type(mixin) == 'table', "mixin must be a table")
+
+  for name,method in pairs(mixin) do
+    if name ~= "included" and name ~= "static" then aClass[name] = method end
+  end
+
+  for name,method in pairs(mixin.static or {}) do
+    aClass.static[name] = method
+  end
+
+  if type(mixin.included)=="function" then mixin:included(aClass) end
+  return aClass
+end
+
+local DefaultMixin = {
+  __tostring   = function(self) return "instance of " .. tostring(self.class) end,
+
+  initialize   = function(self, ...) end,
+
+  isInstanceOf = function(self, aClass)
+    return type(aClass) == 'table' and (aClass == self.class or self.class:isSubclassOf(aClass))
+  end,
+
+  static = {
+    allocate = function(self)
+      assert(type(self) == 'table', "Make sure that you are using 'Class:allocate' instead of 'Class.allocate'")
+      return setmetatable({ class = self }, self.__instanceDict)
+    end,
+
+    new = function(self, ...)
+      assert(type(self) == 'table', "Make sure that you are using 'Class:new' instead of 'Class.new'")
+      local instance = self:allocate()
+      instance:initialize(...)
+      return instance
+    end,
+
+    subclass = function(self, name)
+      assert(type(self) == 'table', "Make sure that you are using 'Class:subclass' instead of 'Class.subclass'")
+      assert(type(name) == "string", "You must provide a name(string) for your class")
+
+      local subclass = _createClass(name, self)
+
+      for methodName, f in pairs(self.__instanceDict) do
+        _propagateInstanceMethod(subclass, methodName, f)
+      end
+      subclass.initialize = function(instance, ...) return self.initialize(instance, ...) end
+
+      self.subclasses[subclass] = true
+      self:subclassed(subclass)
+
+      return subclass
+    end,
+
+    subclassed = function(self, other) end,
+
+    isSubclassOf = function(self, other)
+      return type(other)      == 'table' and
+             type(self.super) == 'table' and
+             ( self.super == other or self.super:isSubclassOf(other) )
+    end,
+
+    include = function(self, ...)
+      assert(type(self) == 'table', "Make sure you that you are using 'Class:include' instead of 'Class.include'")
+      for _,mixin in ipairs({...}) do _includeMixin(self, mixin) end
+      return self
+    end
+  }
+}
+
+function middleclass.class(name, super)
+  assert(type(name) == 'string', "A name (string) is needed for the new class")
+  return super and super:subclass(name) or _includeMixin(_createClass(name), DefaultMixin)
+end
+
+setmetatable(middleclass, { __call = function(_, ...) return middleclass.class(...) end })
+
+local class = middleclass
+
+if SERVER then
+end
+
+
+
+if CLIENT then
+    function createCircle(radius, seg)
+    	local cir = {}
+    
+    	table.insert(cir, { x = 0, y = 0, u = 0.5, v = 0.5 })
+    	for i = 0, seg do
+    		local a = math.rad((i / seg) * -360)
+    		table.insert(cir, { x = math.sin(a)*radius, y = math.cos(a)*radius, 
+    		                    u = math.sin(a)/2 + 0.5, v = math.cos(a)/2 + 0.5 })
+    	end
+    
+    	local a = math.rad(0) -- This is needed for non absolute segment counts
+    	table.insert(cir, { x = math.sin(a) * radius, y = math.cos(a)*radius,
+    	                    u = math.sin(a)/2  + 0.5, v = math.cos(a) / 2 + 0.5 })
+    
+    	return cir
+    end
+----------------------------------------------------------
+    -- colors from gruvbox
+    local colors = {
+        bg = Color(251, 241, 199),  -- fbf1c7ff
+        red = Color(204, 36, 29), -- cc241dff
+        green = Color(152, 151, 26), -- 98971aff
+        yellow = Color(215, 153, 33), -- d79921ff
+        grey = Color(80, 73, 69), -- 504945ff
+        blue = Color(69, 133, 136), -- 458588ff
+    }
+    
+    local squares = {}
+    local arrows = {}
+    local dots = {}
+    
+
+    -- queries all squares and returns square at given position
+    local function field(x, y)
+        for i = 1, #squares do
+            local s = squares[i]
+            if s and s.x == x and s.y == y then
+                return s
+            end
+        end
+    end
+    
+    local function arrow(x, y)
+        for i = 1, #arrows do
+            local a = arrows[i]
+            if a and a.x == x and a.y == y then
+                return a
+            end
+        end
+    end
+
+    local function dot(x, y)
+        for i = 1, #dots do
+            local d = dots[i]
+            if d and d.x == x and d.y == y then
+                return d
+            end
+        end
+    end
+
+    local function checkleveldone()
+        for i = 1, #dots do
+            local d = dots[i]
+            if d then
+                local s = field(d.x, d.y)
+                if s then
+                    if s.color ~= d.color then
+                        return false
+                    end
+                else
+                    return false
+                end
+            end
+        end
+        
+        return true
+    end
+    
+    local moving = 0
+    local currentlevel = 1
+    local levels = {}
+    
+    local function loadlevel(lvl)
+        squares = {}
+        arrows = {}
+        dots = {}
+        
+        currentlevel = lvl
+        if levels[lvl] then
+            levels[lvl]()
+        end
+    end
+    
+    local function reload()
+        loadlevel(currentlevel)
+    end
+
+    local Dot = class("Dot")
+    
+    Dot.static.circle = createCircle(8, 30)
+    
+    function Dot:initialize(x, y, color)
+        self.i = #dots + 1
+        dots[self.i] = self
+        
+        self.x = x
+        self.y = y
+        self.color = color
+    end
+    
+    function Dot:render()
+        render.setColor(colors[self.color])
+        
+        local middleX = self.x * 32 + 16
+        local middleY = self.y * 32 + 16
+        
+        local m = Matrix()
+        m:setTranslation(Vector(middleX, middleY))
+        
+        render.pushMatrix(m)
+            render.drawPoly(Dot.circle)
+        render.popMatrix()
+    end
+
+    local Arrow = class("Arrow")
+    
+    function Arrow:initialize(x, y, rot)
+        self.i = #arrows + 1
+        arrows[self.i] = self
+        
+        self.x = x
+        self.y = y
+        self.rotation = rot
+    end
+    
+    function Arrow:render()
+        render.setColor(colors.grey)
+        
+        local middleX = self.x * 32 + 16
+        local middleY = self.y * 32 + 16
+        
+        local n = 0
+        
+        if self.rotation == "right" then
+            n = 90
+        elseif self.rotation == "down" then
+            n = 180
+        elseif self.rotation == "left" then
+            n = 270
+        end
+        
+        local m = Matrix()
+        m:setTranslation(Vector(middleX, middleY))
+        m:rotate(Angle(0, n, 0))
+        
+        render.pushMatrix(m)
+        
+        local middleX, middleY = 0, 0
+        render.drawPoly {
+            -- Vector(0, 0), Vector(512, 0), Vector(512, 512), Vector(0, 512)
+            Vector(middleX, middleY - 8),
+            --Vector(middleX + 10, middleY),
+            Vector(middleX + 8, middleY + 4),
+            Vector(middleX - 8, middleY + 4),
+        }
+        
+        render.popMatrix(m)
+    end
+
+    local Square = class("Square")
+    
+    function Square:initialize(x, y, rot, color)
+        self.i = #squares + 1
+        squares[self.i] = self
+        
+        self.x = x
+        self.y = y
+        self.rotation = rot
+        self.color = color
+    end
+    
+    function Square:remove()
+        squares[self.i] = nil
+    end
+    
+    -- General moving of a square
+    function Square:move(direction)
+        if direction == "up" then
+            -- check for square in way
+            if self.y > 1 then
+                local s = field(self.x, self.y - 1)
+                if s then
+                    moving = moving + 1
+                    s:move(direction)
+                    moving = moving - 1
+                end
+                
+                self.y = self.y - 1
+            else
+                self:remove()
+            end
+            
+        elseif direction == "left" then
+            -- check for square in way
+            if self.x > 1 then
+                local s = field(self.x - 1, self.y)
+                if s then
+                    moving = moving + 1
+                    s:move(direction)
+                    moving = moving - 1
+                end
+                
+                self.x = self.x - 1
+            else
+                self:remove()
+            end
+        elseif direction == "right" then
+            -- check for square in way
+            if self.x < 16 then
+                local s = field(self.x + 1, self.y)
+                if s then
+                    moving = moving + 1
+                    s:move(direction)
+                    moving = moving - 1
+                end
+                
+                self.x = self.x + 1
+            else
+                self:remove()
+            end
+        elseif direction == "down" then
+            -- check for square in way
+            if self.y < 16 then
+                local s = field(self.x, self.y + 1)
+                if s then
+                    moving = moving + 1
+                    s:move(direction)
+                    moving = moving - 1
+                end
+                
+                self.y = self.y + 1
+            else
+                self:remove()
+            end
+        end
+        
+        
+        if self then
+            local a = arrow(self.x, self.y)
+            if arrow(self.x, self.y) then
+                self.rotation = a.rotation
+            end
+        end
+        
+        if moving == 0 and checkleveldone() then
+            loadlevel(currentlevel + 1)
+        end
+    end
+
+    -- Called when you press E on a square
+    function Square:run()
+        moving = 0
+        self:move(self.rotation)
+    end
+
+    
+    function Square:render()
+        local col = colors[self.color]
+        
+        render.setColor(col)
+        render.drawRect(self.x * 32, self.y * 32, 32, 32)
+        
+        if arrow(self.x, self.y) then
+            render.setColor(col - Color(70, 70, 70, 0))
+        else
+            render.setColor(colors.bg)
+        end
+        
+        local middleX = self.x * 32 + 16
+        local middleY = self.y * 32 + 16
+        
+        local n = 0
+        
+        if self.rotation == "right" then
+            n = 90
+        elseif self.rotation == "down" then
+            n = 180
+        elseif self.rotation == "left" then
+            n = 270
+        end
+        
+        local m = Matrix()
+        m:setTranslation(Vector(middleX, middleY))
+        m:rotate(Angle(0, n, 0))
+        
+        render.pushMatrix(m)
+        
+        render.drawPoly {
+            Vector(0, -8),
+            Vector(8, 4),
+            Vector(-8, 4),
+        }
+        
+        render.popMatrix(m)
+        
+        -- check for dot below square and draw it in right top corner of the square
+        local d = dot(self.x, self.y)
+        if d then
+            render.setColor(colors[d.color] - Color(50, 50, 50, 0))
+            
+            render.drawPoly {
+                Vector(middleX + 8, middleY - 16),
+                Vector(middleX + 16, middleY - 16),
+                Vector(middleX + 16, middleY - 8),
+            }
+        end
+    end
+    
+    hook.add("render", "", function()
+        
+        -- render order:
+        -- 1. background
+        -- 2. arrows
+        -- 3. dots
+        -- 4. squares
+        -- 5. selection
+        -- 6. ui
+        -- 7. cursor
+        
+        render.setColor(colors.bg)
+        render.drawRect(0, 0, 512, 512)
+        
+        for i = 1, #arrows do
+            local a = arrows[i]
+            if a then
+                a:render()
+            end
+        end
+    
+        for i = 1, #dots do
+            local d = dots[i]
+            if d then
+                d:render()
+            end
+        end
+        
+        for i = 1, #squares do
+            local s = squares[i]
+            if s then
+                s:render()
+            end
+        end
+    
+        local x, y = render.cursorPos(player())
+        
+        
+        if x and y then
+            x = math.floor(x/32)
+            y = math.floor(y/32)
+            local s = field(x, y)
+            if s then
+                render.setColor(Color(0, 0, 0, 60))
+                render.drawRect(x * 32, y * 32, 32, 32)
+            end
+        end
+        
+        render.setColor(colors.grey)
+        render.drawRectOutline(256 - 50, 512 - 25, 100, 26)
+        render.drawText(256, 512 - 18, "Reload", 1)
+        
+        render.drawText(3, 3, "Level: " .. currentlevel)
+        
+        local x, y = render.cursorPos(player())
+        
+        if x and y then
+            render.drawLine(x + 1, y, x + 4, y)
+            render.drawLine(x, y + 1, x, y + 4)
+            render.drawLine(x - 4, y, x - 1, y)
+            render.drawLine(x, y - 1, x, y - 4)
+        end
+    end)
+    
+    hook.add("inputPressed", "", function(key)
+        if key ~= KEY.E then return end
+        local x, y = render.cursorPos(player())
+        
+        if not x then return end
+        if not y then return end
+        
+        
+        -- reload?
+        if x > (256-50) and x < (256+50) and y > (512-25) then
+            reload()
+        end
+        
+        x = math.floor(x/32)
+        y = math.floor(y/32)
+        
+        local s = field(x, y)
+        
+        if type(s) == "table" then 
+            s:run()
+        end
+        
+        
+    end)
+    
+    levels = {
+        [1] = function()
+            Square(7, 8, "down", "red")
+            Dot(7, 10, "red")
+        end,
+        [2] = function()
+            Square(7, 6, "down", "blue")
+            Dot(7, 7, "blue")
+            Dot(7, 8, "red")
+            Square(7, 9, "up", "red")
+        end,
+        [3] = function()
+            Square(6, 6, "right", "red")
+            Dot(7, 6, "blue")
+            Dot(8, 6, "red")
+            Dot(7, 7, "green")
+            Square(9, 7, "left", "green")
+            Square(7, 8, "up", "blue")
+        end,
+        [4] = function()
+            Square(6, 5, "down", "blue")
+            Square(8, 7, "left", "red")
+            Dot(4, 8, "red")
+            Dot(6, 10, "blue")
+        end,
+        [5] = function()
+            Square(5, 6, "right", "blue")
+            Square(6, 5, "down", "red")
+            Dot(6, 6, "red")
+            Square(7, 6, "down", "green")
+            Dot(7, 7, "green")
+            Dot(8, 8, "blue")
+        end,
+        [6] = function()
+            Square(5, 6, "right", "blue")
+            Square(6, 5, "down", "red")
+            Dot(6, 6, "red")
+            Square(7, 6, "down", "green")
+            Dot(7, 7, "blue")
+            Dot(8, 8, "green")
+        end,
+        [7] = function()
+            Dot(5, 6, "green")
+            Square(8, 6, "down", "red")
+            Dot(6, 7, "blue")
+            Square(9, 7, "left", "blue")
+            Square(7, 8, "up", "green")
+            Dot(7, 9, "red")
+        end,
+        [8] = function()
+            Square(5, 6, "down", "blue")
+            Arrow(5, 8, "right")
+            Arrow(7, 8, "up")
+            Dot(7, 6, "blue")
+        end,
+        [9] = function()
+            Square(5, 6, "down", "yellow")
+            Arrow(5, 8, "right")
+            Square(5, 8, "right", "green")
+            Arrow(7, 8, "up")
+            Dot(7, 6, "yellow")
+            Dot(8, 6, "green")
+        end,
+        [10] = function()
+            Square(5, 8, "right", "yellow")
+            Arrow(5, 8, "right")
+            Dot(6, 7, "yellow")
+            Dot(7, 7, "blue")
+            Square(7, 8, "up", "blue")
+            Arrow(8, 8, "left")
+            Arrow(7, 8, "up")
+        end,
+        [11] = function()
+            Square(7, 4, "down", "red")
+            Arrow(7, 6, "right")
+            Dot(8, 6, "blue")
+            Square(9, 6, "left", "blue")
+            Square(7, 8, "up", "green")
+            Dot(6, 6, "red")
+            Dot(5, 6, "green")
+        end,
+        [12] = function()
+            Square(5, 5, "right", "red")
+            Arrow(7, 5, "down")
+            Square(9, 5, "left", "blue")
+            Dot(7, 7, "blue")
+            Dot(6, 7, "red")
+            Dot(8, 7, "green")
+            Square(7, 9, "up", "green")
+        end,
+        [13] = function()
+            Square(5, 9, "right", "yellow")
+            Dot(6, 9, "yellow")
+            Dot(6, 8, "green")
+            Arrow(6, 7, "down")
+            Arrow(8, 8, "left")
+            Square(7, 10, "up", "green")
+        end,
+        [14] = function()
+            Dot(5, 8, "yellow")
+            Square(7, 9, "up", "blue")
+            Square(8, 7, "left", "yellow")
+            Dot(6, 6, "blue")
+            Square(6, 5, "down", "green")
+            Arrow(6, 5, "down")
+            Dot(6, 4, "green")
+        end,
+        [15] = function()
+            Dot(8, 8, "blue")
+            Square(8, 7, "down", "green")
+            Square(9, 8, "left", "red")
+            Square(8, 9, "up", "blue")
+            Square(7, 8, "right", "yellow")
+            Dot(7, 7, "red")
+            Dot(9, 7, "yellow")
+            Dot(9, 9, "green")
+        end,
+        [16] = function()
+            Square(6, 6, "right", "red")
+            Arrow(6, 6, "right")
+            Dot(6, 7, "red")
+            Arrow(7, 8, "up")
+            Square(8, 7, "left", "blue")
+            Arrow(8, 7, "left")
+            Dot(9, 7, "blue")
+            Arrow(8, 6, "down")
+        end,
+        [17] = function()
+            Arrow(6, 6, "down")
+            Square(6, 6, "down", "red")
+            Arrow(6, 7, "right")
+            Square(6, 7, "right", "green")
+            Arrow(9, 6, "left")
+            Square(9, 6, "left", "blue")
+            Dot(7, 7, "red")
+            Dot(8, 7, "green")
+            Dot(9, 7, "blue")
+            Arrow(8, 8, "up")
+        end,
+        [18] = function()
+            Arrow(6, 6, "down")
+            Square(6, 6, "down", "green")
+            Arrow(6, 7, "right")
+            Square(6, 7, "right", "red")
+            Arrow(9, 6, "left")
+            Square(9, 6, "left", "blue")
+            Dot(7, 7, "red")
+            Dot(8, 7, "green")
+            Dot(9, 7, "blue")
+            Arrow(8, 8, "up")
+        end,
+        [19] = function()
+            Arrow(5, 10, "right")
+            Arrow(8, 10, "up")
+            Arrow(8, 8, "left")
+            Arrow(6, 9, "right")
+            Square(7, 9, "up", "green")
+            Arrow(7, 9, "up")
+            Dot(7, 8, "green")
+            Square(6, 8, "down", "blue")
+            Arrow(6, 8, "down")
+            Square(5, 7, "down", "red")
+            Arrow(5, 7, "down")
+            Dot(7, 6, "blue")
+            Dot(7, 4, "red")
+        end,
+        [20] = function()
+            Square(6, 6, "down", "green")
+            Arrow(6, 6, "down")
+            Dot(6, 7, "green")
+            Square(6, 8, "right", "yellow")
+            Arrow(6, 8, "right")
+            Dot(7, 8, "red")
+            Square(8, 8, "up", "blue")
+            Arrow(8, 8, "up")
+            Dot(8, 7, "blue")
+            Square(8, 6, "left", "red")
+            Arrow(8, 6, "left")
+            Dot(7, 6, "yellow")
+            Arrow(6, 10, "up")
+        end,
+    }
+    
+    currentlevel = 1
+    loadlevel(currentlevel)
+end

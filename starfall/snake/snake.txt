@@ -1,0 +1,496 @@
+--@name Snake
+--@author suun
+--@shared 
+
+-------------------------------------------------------------------------------
+
+config = {
+    colors = {
+        snake = Color(56, 180, 79),
+        background = Vector(51, 51, 51),
+    },
+    turnRate = 0.1,
+    speedRate = 3,
+    createBodyRate = 5,
+}
+
+setmetatable(config.colors, {
+    __index = function(t, k)
+        if k == "snake" then
+            return Color(math.random(0, 255), 0, 0)
+        end
+    end
+})
+
+-------------------------------------------------------------------------------
+-- middleclass library (https://github.com/kikito/middleclass)
+
+
+local middleclass = {
+  _VERSION     = 'middleclass v4.1.0',
+  _DESCRIPTION = 'Object Orientation for Lua',
+  _URL         = 'https://github.com/kikito/middleclass',
+  _LICENSE     = [[
+    MIT LICENSE
+    Copyright (c) 2011 Enrique García Cota
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ]]
+}
+
+local function _createIndexWrapper(aClass, f)
+  if f == nil then
+    return aClass.__instanceDict
+  else
+    return function(self, name)
+      local value = aClass.__instanceDict[name]
+
+      if value ~= nil then
+        return value
+      elseif type(f) == "function" then
+        return (f(self, name))
+      else
+        return f[name]
+      end
+    end
+  end
+end
+
+local function _propagateInstanceMethod(aClass, name, f)
+  f = name == "__index" and _createIndexWrapper(aClass, f) or f
+  aClass.__instanceDict[name] = f
+
+  for subclass in pairs(aClass.subclasses) do
+    if rawget(subclass.__declaredMethods, name) == nil then
+      _propagateInstanceMethod(subclass, name, f)
+    end
+  end
+end
+
+local function _declareInstanceMethod(aClass, name, f)
+  aClass.__declaredMethods[name] = f
+
+  if f == nil and aClass.super then
+    f = aClass.super.__instanceDict[name]
+  end
+
+  _propagateInstanceMethod(aClass, name, f)
+end
+
+local function _tostring(self) return "class " .. self.name end
+local function _call(self, ...) return self:new(...) end
+
+local function _createClass(name, super)
+  local dict = {}
+  dict.__index = dict
+
+  local aClass = { name = name, super = super, static = {},
+                   __instanceDict = dict, __declaredMethods = {},
+                   subclasses = setmetatable({}, {__mode='k'})  }
+
+  if super then
+    setmetatable(aClass.static, { __index = function(_,k) return dict[k] or super.static[k] end })
+  else
+    setmetatable(aClass.static, { __index = function(_,k) return dict[k] end })
+  end
+
+  setmetatable(aClass, { __index = aClass.static, __tostring = _tostring,
+                         __call = _call, __newindex = _declareInstanceMethod })
+
+  return aClass
+end
+
+local function _includeMixin(aClass, mixin)
+  assert(type(mixin) == 'table', "mixin must be a table")
+
+  for name,method in pairs(mixin) do
+    if name ~= "included" and name ~= "static" then aClass[name] = method end
+  end
+
+  for name,method in pairs(mixin.static or {}) do
+    aClass.static[name] = method
+  end
+
+  if type(mixin.included)=="function" then mixin:included(aClass) end
+  return aClass
+end
+
+local DefaultMixin = {
+  __tostring   = function(self) return "instance of " .. tostring(self.class) end,
+
+  initialize   = function(self, ...) end,
+
+  isInstanceOf = function(self, aClass)
+    return type(aClass) == 'table' and (aClass == self.class or self.class:isSubclassOf(aClass))
+  end,
+
+  static = {
+    allocate = function(self)
+      assert(type(self) == 'table', "Make sure that you are using 'Class:allocate' instead of 'Class.allocate'")
+      return setmetatable({ class = self }, self.__instanceDict)
+    end,
+
+    new = function(self, ...)
+      assert(type(self) == 'table', "Make sure that you are using 'Class:new' instead of 'Class.new'")
+      local instance = self:allocate()
+      instance:initialize(...)
+      return instance
+    end,
+
+    subclass = function(self, name)
+      assert(type(self) == 'table', "Make sure that you are using 'Class:subclass' instead of 'Class.subclass'")
+      assert(type(name) == "string", "You must provide a name(string) for your class")
+
+      local subclass = _createClass(name, self)
+
+      for methodName, f in pairs(self.__instanceDict) do
+        _propagateInstanceMethod(subclass, methodName, f)
+      end
+      subclass.initialize = function(instance, ...) return self.initialize(instance, ...) end
+
+      self.subclasses[subclass] = true
+      self:subclassed(subclass)
+
+      return subclass
+    end,
+
+    subclassed = function(self, other) end,
+
+    isSubclassOf = function(self, other)
+      return type(other)      == 'table' and
+             type(self.super) == 'table' and
+             ( self.super == other or self.super:isSubclassOf(other) )
+    end,
+
+    include = function(self, ...)
+      assert(type(self) == 'table', "Make sure you that you are using 'Class:include' instead of 'Class.include'")
+      for _,mixin in ipairs({...}) do _includeMixin(self, mixin) end
+      return self
+    end
+  }
+}
+
+function middleclass.class(name, super)
+  assert(type(name) == 'string', "A name (string) is needed for the new class")
+  return super and super:subclass(name) or _includeMixin(_createClass(name), DefaultMixin)
+end
+
+setmetatable(middleclass, { __call = function(_, ...) return middleclass.class(...) end })
+class = middleclass
+
+
+-------------------------------------------------------------------------------
+
+if SERVER then
+end
+
+-------------------------------------------------------------------------------
+
+if CLIENT then
+
+    -- Function which generates polygon with form of half circle (head of snake, tail)
+    local function halfCircle(x, y, radius, seg)
+    	local cir = {}
+    
+    	table.insert(cir, { x = x, y = y, u = 0.5, v = 0.5 })
+    	for i = 0, seg do
+    		local a = math.rad((i/seg) * -180)
+    		table.insert(cir, {
+			x = x + math.sin(a) * radius,
+			y = y + math.cos(a) * radius,
+			u = math.sin(a) / 2 + 0.5,
+			v = math.cos(a) / 2 + 0.5
+		})
+    	end
+    
+    	local a = math.rad(0) -- This is needed for non absolute segment counts
+    	table.insert(cir, {
+		x = x + math.sin(a) * radius,
+		y = y + math.cos(a) * radius,
+		u = math.sin(a) / 2 + 0.5,
+		v = math.cos(a) / 2 + 0.5
+	})
+    	
+        return cir
+    end
+
+
+    local function fullCircle(x, y, radius, seg)
+    	local cir = {}
+    
+    	table.insert(cir, { x = x, y = y, u = 0.5, v = 0.5 })
+    	for i = 0, seg do
+    		local a = math.rad((i/seg) * -360)
+    		table.insert(cir, {
+			x = x + math.sin(a) * radius,
+			y = y + math.cos(a) * radius,
+			u = math.sin(a) / 2 + 0.5,
+			v = math.cos(a) / 2 + 0.5
+		})
+    	end
+    
+    	local a = math.rad(0) -- This is needed for non absolute segment counts
+    	table.insert(cir, {
+		x = x + math.sin(a) * radius,
+		y = y + math.cos(a) * radius,
+		u = math.sin(a) / 2 + 0.5,
+		v = math.cos(a) / 2 + 0.5
+	})
+    	
+        return cir
+    end    
+
+-------------------------------------------------------------------------------
+	
+    local sin = math.sin
+    local cos = math.cos
+
+    local Apple -- Forward declared
+    local Snake = class("Snake")
+    
+    Snake.static.headRadius = 10
+    Snake.static.headCircle = halfCircle(5, 0, Snake.headRadius - 1, 20)
+    Snake.static.tailCircle = halfCircle(-2, 0, Snake.headRadius - 0.9, 20)
+    Snake.static.incLength = 20
+    
+    local curtime = timer.curtime
+    
+    function Snake:initialize(rate)
+        self.length = 20
+        self.head = Vector(256, 256)
+        self.headRotation = 1
+        self.body = {}
+        self.inc = 1
+        
+        self.rate = rate or 0.001
+        self.thinkID = "Snake_Think_" .. math.random(1, 100000)
+        
+        local last = curtime()
+        timer.create(self.thinkID, self.rate, 0, function()
+            self:think(curtime() - last)
+            last = curtime()
+        end)
+        
+    end
+    
+    function Snake:delete()
+        timer.remove(self.thinkID)
+    end
+    
+    -- There to overwrite
+    function Snake:collision()
+    end
+    
+    
+    function Snake:eat(apple)
+        self.length = self.length + Snake.incLength
+        apple:eat()
+    end
+    
+    
+    function Snake:think(dt)
+        -- Adjust direction
+        if input.isKeyDown(KEY.RIGHTARROW) then
+            self.headRotation = self.headRotation + config.turnRate
+        elseif input.isKeyDown(KEY.LEFTARROW) then
+            self.headRotation = self.headRotation - config.turnRate
+        end
+        
+        
+        -- Calc new pos of head
+        self.head.x = self.head.x + cos(self.headRotation) * config.speedRate
+        self.head.y = self.head.y + sin(self.headRotation) * config.speedRate
+
+        --[[
+            Body of snake: 2 points get created each x. timer tick (x = config.createBodyRate)
+            These points are on the sides of the head like this (O: head, X: point):
+               OOOOOOOO
+              OOOOOOOOOO
+             OOOOOOOOOOOO
+            XOOOOOOOOOOOOX
+        --]]
+        self.inc = self.inc + 1
+        if self.inc % config.createBodyRate == 0 then
+            table.insert(self.body, 1, {
+                Vector(self.head.x + cos(self.headRotation - 90) * Snake.headRadius,
+                       self.head.y + sin(self.headRotation - 90) * Snake.headRadius),
+                Vector(self.head.x + cos(self.headRotation + 90) * Snake.headRadius,
+                       self.head.y + sin(self.headRotation + 90) * Snake.headRadius)
+            })
+            self.body[1].pos = Vector(self.head.x, self.head.y)
+            self.body[1].rot = self.headRotation
+            self.body[self.length + 1] = nil
+            
+        end
+
+        
+        -- Collision check
+        -- A normal circle collision check gets performed on almost every body point (except the first points).
+        -- This is more efficient than doing a halfcircle collision check.
+        local start_check = 3 -- TODO: move to config
+        if #self.body > start_check then
+            for i = start_check, #self.body do
+                for k = 1, 2 do
+                    if self.body[i][k]:getDistance(self.head) < (Snake.headRadius - 3) then
+                        self:collision()
+                    end
+                end
+            end
+        end
+
+        -- Collision check on borders
+        if (self.head.x + Snake.headRadius) > 512 or
+           (self.head.x - Snake.headRadius) < 0 or
+           (self.head.y - Snake.headRadius) < 0 or
+           (self.head.y + Snake.headRadius) > 512 then
+            self:collision()
+        end
+        
+        if not self.apple then return end
+        
+        -- Collision check on apple
+        -- body points
+        if #self.body > 5 then
+            for i = 5, #self.body do
+                for k = 1, 2 do
+                    if self.body[i][k]:getDistance(self.apple.pos) < (Apple.radius) then
+                        self:eat(self.apple)
+                    end
+                end
+            end
+        end
+        
+        if self.head:getDistance(self.apple.pos) < (Apple.radius + Snake.headRadius) then
+            self:eat(self.apple)
+        end
+    end
+    
+    
+    local render = render
+    function Snake:render()
+        render.setColor(config.colors.snake)
+
+        -- Head of snake
+        local m = Matrix()
+        m:translate(self.head)
+        m:rotate(Angle(0, math.deg(self.headRotation) - 180, 0))
+        render.pushMatrix(m)
+            render.drawPoly(Snake.headCircle)
+        render.popMatrix(m)
+        
+        -- Tail of snake
+        if #self.body > 2 then
+            local m = Matrix()
+            m:translate(self.body[#self.body].pos)
+            m:setAngles(Angle(0, math.deg(self.body[#self.body].rot), 0))
+            render.pushMatrix(m)
+                render.drawPoly(Snake.tailCircle)
+            render.popMatrix(m)
+        end
+        
+        if #self.body < 2 then return end
+
+        -- Render poly from head to last body pos
+    	render.drawPoly({
+    		Vector(self.head.x + cos(self.headRotation - 90) * Snake.headRadius,
+    		       self.head.y + sin(self.headRotation - 90) * Snake.headRadius),
+    		Vector(self.head.x + cos(self.headRotation + 90) * Snake.headRadius,
+                   self.head.y + sin(self.headRotation + 90) * Snake.headRadius),
+            Vector(self.body[1][2].x, self.body[1][2].y),
+            Vector(self.body[1][1].x, self.body[1][1].y)
+    	})
+        
+        -- Render body outline
+        for i = 1, #self.body - 1 do
+        	render.drawPoly({
+        		self.body[i][1], self.body[i][2],
+        		self.body[i+1][2], self.body[i+1][1],
+        	})
+        end
+    end
+    
+    -- Apple got localized before
+    Apple = class("Apple")
+    
+    Apple.static.radius = 5
+    Apple.static.circle = fullCircle(0, 0, Apple.radius, 20)
+    
+    function Apple:initialize(snake)
+        snake.apple = self
+        self.pos = Vector(20, 20)
+        
+        local j = 0 -- prevent infinite loop
+        while true do
+            self.pos.x = math.random(0, 512)
+            self.pos.y = math.random(0, 512)
+            
+            for i = 1, #snake.body do
+                for k = 1, 2 do
+                	-- (Snake.headRadius/2) prevents apple spawning inside the snake body
+                    if not (snake.body[i][k]:getDistance(self.pos) < (Apple.radius + (Snake.headRadius/2))) then
+                    	
+                        return
+                    end
+                end
+            end
+            
+            j = j + 1
+            if j > 1000 then break end
+        end
+    end
+
+    
+    function Apple:render()
+        render.setColor(Color(223, 56, 47))
+        local m = Matrix()
+        m:translate(self.pos)
+        render.pushMatrix(m)
+            render.drawPoly(Apple.circle)
+        render.popMatrix(m)
+    end
+    
+    -- There to get overriden
+    function Apple:eat()
+    end
+    
+    
+    local snake, apple
+    local function newSnake()
+    	snake = Snake()
+    	
+    	snake.collision = function(self)
+    		self:delete()
+    		newSnake()
+    	end
+    
+		local function newApple()
+		    apple = Apple(snake)
+		    apple.eat = newApple
+		end
+		newApple()
+    end
+    
+    newSnake()
+    hook.add("render", "", function()
+    	if snake then
+        	snake:render()
+        end
+        if apple then
+        	apple:render()
+        end
+end)
+end
