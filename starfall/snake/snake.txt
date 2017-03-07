@@ -2,6 +2,11 @@
 --@author suun
 --@shared 
 
+local _Vector = Vector
+function Vector(x, y)
+    return _Vector(x, y, 0)
+end
+
 -------------------------------------------------------------------------------
 
 config = {

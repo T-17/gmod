@@ -3,6 +3,10 @@
 --@shared
 -- original game: http://gameaboutsquares.com
 
+local _Vector = Vector
+function Vector(x, y)
+    return _Vector(x, y, 0)
+end
 
 local middleclass = {
   _VERSION     = 'middleclass v4.1.0',
